@@ -1,0 +1,238 @@
+html {
+  background-color: #EFF3FF;
+}
+
+li {
+  text-decoration: none;
+  list-style-type: none;
+  cursor: pointer;
+}
+
+@font-face {
+  font-family: 'Manrope';
+  src: url('../fonts/Manrope-Thin.woff2');
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Manrope';
+  src: url('../fonts/Manrope-Regular.woff2');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Manrope';
+  src: url('../fonts/Manrope-Medium.woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Manrope';
+  src: url('../fonts/Manrope-Bold.woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Manrope';
+  src: url('../fonts/Manrope-ExtraBold.woff2');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+.header {}
+
+.header__navigation {
+  padding-inline: 24px;
+  padding-block: 16px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header__navigation-group {
+  display: flex;
+  flex-direction: row;
+  gap: 24px;
+  align-items: center;
+}
+
+.header__navigation-item {}
+
+.header__navigation-item--friends {}
+
+.header__navigation-item--global {}
+
+.header__logo {}
+
+.header__navigation-item--archive {}
+
+.header__navigation-item--profile {}
+
+.gratitude {
+  background-color: #fff;
+  border-radius: 28px;
+  padding-block: 28px;
+  padding-inline: 47px;
+  max-width: 1000px;
+  margin: 20px auto;
+  font-family: 'Manrope', sans-serif;
+}
+
+.gratitude__title {
+  font-size: 36px;
+  margin-bottom: 10px;
+  font-weight: 400;
+  text-align: left;
+}
+
+.gratitude__content {
+  background-color: #EFF3FF;
+  padding: 10px;
+  border-radius: 14px;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.gratitude__input-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.gratitude__file-label {
+  font-size: 1.5rem;
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+.gratitude__textarea {
+  width: 100%;
+  resize: none;
+  padding: 10px;
+  border-radius: 7px;
+  background-color: #EFF3FF;
+  font-size: 24px;
+}
+
+#gratitude-input {
+  border: none;
+  padding: 10px;
+  outline: none;
+  border-radius: 8px;
+  transition: border 0.2s ease-in-out;
+}
+
+#gratitude-input:focus {
+  border: none;
+  box-shadow: none;
+}
+
+.gratitude__images {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.gratitude__images img {
+  border-radius: 10px;
+  width: 100px;
+  height: 70px;
+  object-fit: cover;
+}
+
+.gratitude__footer {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+}
+
+.gratitude__save-btn {
+  font-family: 'Manrope';
+  font-weight: 800;
+  background-color: #BDCCFF;
+  border: none;
+  box-shadow: 5px 6px 0px 0px rgb(232, 237, 255);
+  padding: 22px 35px;
+  color: white;
+  font-size: 24px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-transform: uppercase;
+}
+
+.gratitude__save-btn:hover {
+  background-color: #90aaff;
+}
+
+.gratitude__public-option {
+  display: flex;
+  align-items: center;
+  font-size: 24px;
+  color: #000;
+  text-transform: lowercase;
+}
+
+.gratitude__checkbox {
+  appearance: none;
+  width: 48px;
+  height: 48px;
+  border: 2px solid #9BB2FF;
+  border-radius: 14px;
+  margin-right: 10px;
+  background-color: white;
+  cursor: pointer;
+  position: relative;
+  display: inline-block;
+  transition: border-color 0.2s ease;
+}
+
+.gratitude__checkbox::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  border-radius: 10px;
+  background-color: transparent;
+  transition: background-color 0.2s ease;
+}
+
+.gratitude__checkbox::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 12px;
+  height: 6px;
+  border: solid white;
+  border-width: 0 0 2px 2px;
+  transform: translate(-50%, -50%) rotate(-45deg);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.gratitude__checkbox:checked::before {
+  background-color: #BDCCFF;
+}
+
+.gratitude__checkbox:checked::after {
+  opacity: 1;
+}
+
+.gratitude__public-label {
+  font-weight: 200;
+  cursor: pointer;
+}

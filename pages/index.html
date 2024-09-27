@@ -1,25 +1,71 @@
 <!DOCTYPE html>
 <html lang="uk">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="./assets/css/styles.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/styles.css') }}">
   <title>BeGrateful</title>
 </head>
+
 <body>
-  <header>
-    <!-- Include header partial -->
-    <div id="header"></div>
+  <header class="header">
+    <nav class="header__navigation">
+      <ul class="header__navigation-group header__navigation-group--left">
+        <li class="header__navigation-item header__navigation-item--friends">
+          <img src="{{ url_for('static', filename='assets/icons/friends-icon.svg') }}" alt="Friends Icon">
+        </li>
+        <li class="header__navigation-item header__navigation-item--global">
+          <img src="{{ url_for('static', filename='assets/icons/global-icon.svg') }}" alt="Global Icon">
+        </li>
+      </ul>
+
+      <img src="{{ url_for('static', filename='assets/icons/logo.svg') }}" alt="Logo Icon" class="header__logo">
+
+      <ul class="header__navigation-group header__navigation-group--right">
+        <li class="header__navigation-item header__navigation-item--archive">
+          <img src="{{ url_for('static', filename='assets/icons/calendar-icon.svg') }}" alt="Archive Icon">
+        </li>
+        <li class="header__navigation-item header__navigation-item--profile">
+          <img src="{{ url_for('static', filename='assets/images/profile-image.jpg') }}" alt="Profile Image">
+        </li>
+      </ul>
+    </nav>
   </header>
-  <main>
-    <!-- Content specific to the index page -->
-    <h1>Ласкаво просимо до BeGrateful</h1>
-    <p>Поділіться своєю вдячністю з іншими.</p>
+
+  <main class="main">
+    <div class="gratitude">
+      <h2 class="gratitude__title">За що ви вдячні сьогодні?</h2>
+      <div class="gratitude__content">
+        <div class="gratitude__input-wrapper">
+          <label for="gratitude__input" class="gratitude__file-label">
+            <img src="{{ url_for('static', filename='assets/icons/screpka-icon.svg') }}" alt="" />
+          </label>
+          <textarea id="gratitude-input" class="gratitude__textarea" rows="2"
+            placeholder="Напишіть, за що ви вдячні сьогодні..."></textarea>
+        </div>
+        <input type="file" id="gratitude__input" multiple accept="image/*" style="display: none;">
+        <div class="gratitude__images" id="gratitude__images-preview"></div>
+
+      </div>
+      <div class="gratitude__footer">
+        <button class="gratitude__save-btn">Зберегти</button>
+        <div class="gratitude__public-option">
+          <input type="checkbox" id="public" class="gratitude__checkbox" name="public">
+          <label for="public" class="gratitude__public-label">Зробити вдячність публічною*</label>
+        </div>
+      </div>
+
+      <input type="file" id="gratitude-input" class="gratitude__file-input" multiple accept="image/*"
+        style="display: none;">
+    </div>
   </main>
-  <footer>
-    <!-- Include footer partial -->
+
+  <footer class="footer">
     <div id="footer"></div>
   </footer>
-  <script src="./assets/js/app.js"></script>
+
+  <script src="{{ url_for('static', filename='assets/js/app.js') }}"></script>
 </body>
+
 </html>
