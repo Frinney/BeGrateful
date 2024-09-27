@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Логін</title>
+</head>
+<body>
+    <h1>Логін користувача</h1>
+    
+    <form action="/login" method="POST">
+        <label for="login">Логін:</label>
+        <input type="text" id="login" name="login" required>
+        <br><br>
+
+        <label for="password">Пароль:</label>
+        <input type="password" id="password" name="password" required>
+        <button type="button" onclick="togglePassword('password')">Показати</button>
+        <br><br>
+
+        <button type="submit">Увійти</button>
+    </form>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul>
+            {% for message in messages %}
+                <li>{{ message }}</ li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+    <script>
+        function togglePassword(fieldId) {
+            const passwordField = document.getElementById(fieldId);
+            const type = passwordField.type === 'password' ? 'text' : 'password';
+            passwordField.type = type;
+        }
+    </script>
+</body>
+</html>
