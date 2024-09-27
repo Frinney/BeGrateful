@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Global Gratitudes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        div {
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }
+        h1 {
+            color: #333;
+        }
+        .author {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Публічні подяки</h1>    
+    {% if gratitudes %}
+        {% for gratitude in gratitudes %}
+            <div>
+                <p>{{ gratitude.content }}</p>
+                {% if gratitude.image_url %}
+                    <img src="{{ url_for('static', filename=gratitude.image_url) }}" alt="Gratitude Image">
+                {% endif %}
+                <p class="author">
+                    <strong>Автор:</strong> 
+                    {% if gratitude.user %}
+                        {{ gratitude.user.login }}
+                    {% else %}
+                        Невідомий 
+                    {% endif %}
+                </p>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>Немає публічних подяк.</p>
+    {% endif %}
+</body>
+</html>
