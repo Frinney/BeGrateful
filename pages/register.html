@@ -1,52 +1,93 @@
 <!DOCTYPE html>
 <html lang="uk">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Реєстрація</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles1.css') }}">
+    <title>BeGrateful</title>
+    <style>
+        .input-error {
+            box-shadow: 0 0 5px 2px red;
+        }
+
+        .input-normal {
+            box-shadow: 5px 6px 0px #C1CFFF;
+        }
+
+        .flash-messages {
+            color: red;
+        }
+    </style>
 </head>
+
 <body>
-    <h1>Реєстрація користувача</h1>
-    
-    <form action="/register" method="POST">
-        <label for="first_name">Ім'я:</label>
-        <input type="text" id="first_name" name="first_name">
-        <br><br>
+    <header class="header">
+        <nav class="header__navigation">
 
-        <label for="last_name">Прізвище:</label>
-        <input type="text" id="last_name" name="last_name">
-        <br><br>
+            <img src="{{ url_for('static', filename='icons/logo.svg') }}" alt="Logo Icon" class="header__logo">
 
-        <label for="login">Логін:</label>
-        <input type="text" id="login" name="login" required>
-        <br><br>
+        </nav>
+    </header>
 
-        <label for="email">Електронна пошта:</label>
-        <input type="email" id="email" name="email" required>
-        <br><br>
+    <main class="main">
+        <div class="formReg">
+            <h1 class="formReg__title">Реєстрація</h1>
 
-        <label for="password">Пароль:</label>
-        <input type="password" id="password" name="password" required>
-        <button type="button" onclick="togglePassword('password')">Показати</button>
-        <br><br>
+            <form action="/register" method="POST">
 
-        <label for="confirm_password">Підтвердження пароля:</label>
-        <input type="password" id="confirm_password" name="confirm_password" required>
-        <button type="button" onclick="togglePassword('confirm_password')">Показати</button>
-        <br><br>
+                <div class="classNameAndPass">
+                    <div class="nameAndPass1">
+                        <label for="first_name">Ім'я</label>
+                        <input type="text" id="first_name" name="first_name" class="{{ 'input-error' if errors.get('first_name') else 'input-normal' }}" value="{{ request.form.first_name }}">
+                    </div>
 
-        <button type="submit">Зареєструватися</button>
-    </form>
+                    <div class="nameAndPass2">
+                        <label for="last_name">Прізвище</label>
+                        <input type="text" id="last_name" name="last_name" class="{{ 'input-error' if errors.get('last_name') else 'input-normal' }}" value="{{ request.form.last_name }}">
+                    </div>
+                </div>
 
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <ul>
-            {% for message in messages %}
-                <li>{{ message }}</li>
-            {% endfor %}
-            </ul>
-        {% endif %}
-    {% endwith %}
+                <div class="logAndMail">
+                    <label for="login">Логін*</label>
+                    <input type="text" id="login" name="login" class="{{ 'input-error' if errors.get('login') else 'input-normal' }}" required value="{{ request.form.login }}">
+                </div>
+
+                <div class="logAndMail">
+                    <label for="email">Пошта*</label>
+                    <input type="email" id="email" name="email" class="{{ 'input-error' if errors.get('email') else 'input-normal' }}" required value="{{ request.form.email }}">
+                </div>
+
+                <div class="classNameAndPass">
+                    <div class="nameAndPass1">
+                        <label for="password">Пароль*</label>
+                        <input type="password" id="password" name="password" class="{{ 'input-error' if errors.get('password') else 'input-normal' }}" required>
+                    </div>
+
+                    <div class="nameAndPass2">
+                        <label for="confirm_password">Підтвердіть пароль*</label>
+                        <input type="password" id="confirm_password" name="confirm_password" class="{{ 'input-error' if errors.get('confirm_password') else 'input-normal' }}" required>
+                    </div>
+                </div>
+
+                <button type="submit">Реєстрація</button>
+
+                {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                <ul class="flash-messages">
+                    {% for message in messages %}
+                    <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                {% endwith %}
+            </form>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div id="footer"></div>
+    </footer>
 
     <script>
         function togglePassword(fieldId) {
@@ -56,4 +97,5 @@
         }
     </script>
 </body>
+
 </html>

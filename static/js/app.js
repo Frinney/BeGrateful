@@ -1,28 +1,31 @@
-document.addEventListener('DOMContentLoaded', function () {
-  const fileInput = document.getElementById('gratitude__input');
-  const imagePreview = document.getElementById('gratitude__images-preview');
-  const fileLabel = document.querySelector('.gratitude__file-label');
-  
-  // Обработчик для загрузки изображений
-  fileLabel.addEventListener('click', (event) => {
-    event.preventDefault(); // Предотвращает любое лишнее действие
-    fileInput.click(); // Открывает окно выбора файла при клике на скрепку
-  });
-  
-  fileInput.addEventListener('change', function() {
-    imagePreview.innerHTML = ''; // Очистка контейнера для превью при новой загрузке
-    const files = this.files;
-  
-    if (files.length > 0) {
-      for (const file of files) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          const img = document.createElement('img');
-          img.src = e.target.result;
-          imagePreview.appendChild(img); // Добавляем превью изображений
-        };
-        reader.readAsDataURL(file); // Чтение файлов в base64
-      }
+document.addEventListener('DOMContentLoaded', function() {
+    const friendsModal = document.getElementById('friendsModal');
+    const closeFriendsModalBtn = document.getElementById('closeFriendsModalBtn');
+    const friendsIcon = document.getElementById('friendsIcon');
+
+    // Функция для открытия модального окна
+    function openModal() {
+        friendsModal.style.display = 'block';
     }
-  });
+
+    // Функция для закрытия модального окна
+    function closeModal() {
+        friendsModal.style.display = 'none';
+    }
+
+    // Открываем модальное окно по клику на иконку друзей
+    friendsIcon.addEventListener('click', function(event) {
+        event.preventDefault(); // Предотвращает переход по ссылке
+        openModal(); // Открыть модальное окно
+    });
+
+    // Закрываем модальное окно по клику на кнопку закрытия
+    closeFriendsModalBtn.addEventListener('click', closeModal);
+
+    // Закрываем модальное окно при клике вне его содержимого
+    window.addEventListener('click', function(event) {
+        if (event.target === friendsModal) {
+            closeModal();
+        }
+    });
 });

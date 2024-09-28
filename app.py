@@ -1,7 +1,7 @@
 import os
 import re
 import asyncio
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, jsonify, request, redirect, url_for, flash, session
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
@@ -18,6 +18,7 @@ app.secret_key = 'your_secret_key'
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite+aiosqlite:///gratitudes.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 engine = create_async_engine(app.config['SQLALCHEMY_DATABASE_URI'], echo=True)
 async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
@@ -42,6 +43,16 @@ class Gratitude(db.Model):
     user_id = Column(Integer, ForeignKey('users.id'))
     user = relationship('User', back_populates='gratitudes')
     created_at = Column(DateTime, default=datetime.utcnow)
+
+class Friendship(db.Model):
+    __tablename__ = 'friendships'
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    friend_user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship('User', foreign_keys=[user_id], backref='friends')
+    friend = relationship('User', foreign_keys=[friend_user_id], backref='friend_of')
 
 
 async def create_db():
@@ -78,6 +89,8 @@ def index():
 
 @app.route('/register', methods=['GET', 'POST'])
 async def register():
+    errors = {}
+
     if request.method == 'POST':
         first_name = request.form.get('first_name', '')  
         last_name = request.form.get('last_name', '') 
@@ -87,35 +100,32 @@ async def register():
         confirm_password = request.form['confirm_password']
 
         if first_name and not is_valid_name(first_name):
-            flash('Ім\'я повинно містити лише букви!')
-            return redirect(url_for('register'))
+            errors['first_name'] = 'Ім\'я повинно містити лише букви!'
         
         if last_name and not is_valid_name(last_name):
-            flash('Прізвище повинно містити лише букви!')
-            return redirect(url_for('register'))
-
+            errors['last_name'] = 'Прізвище повинно містити лише букви!'
+        
         if not is_valid_login(login):
-            flash('Логін повинен містити лише латинські букви та цифри, без пробілів!')
-            return redirect(url_for('register'))
-
+            errors['login'] = 'Логін повинен містити лише латинські букви та цифри, без пробілів!'
+        
         if not is_valid_email(email):
-            flash('Неправильний формат пошти!')
-            return redirect(url_for('register'))
-
+            errors['email'] = 'Неправильний формат пошти!'
+        
         if not is_valid_password(password):
-            flash('Пароль не відповідає вимогам!')
-            return redirect(url_for('register'))
-
+            errors['password'] = 'Пароль не відповідає вимогам!'
+        
         if password != confirm_password:
-            flash('Паролі не співпадають!')
-            return redirect(url_for('register'))
+            errors['confirm_password'] = 'Паролі не співпадають!'
+
+        if errors:
+            return render_template('register.html', errors=errors, form=request.form)
 
         async with async_session() as session:
             async with session.begin():
                 existing_user = await session.execute(select(User).filter_by(login=login))
                 if existing_user.scalars().first() is not None:
-                    flash('Такий користувач уже існує!')
-                    return redirect(url_for('register'))
+                    errors['login'] = 'Такий користувач уже існує!'
+                    return render_template('register.html', errors=errors, form=request.form)
 
                 hashed_password = generate_password_hash(password)
                 new_user = User(first_name=first_name, last_name=last_name, login=login, email=email, password=hashed_password)
@@ -125,14 +135,13 @@ async def register():
         flash('Реєстрація пройшла успішно!')
         return redirect(url_for('index'))
 
-    return render_template('register.html')
+    return render_template('register.html', errors=errors)
 
 @app.route('/login', methods=['GET', 'POST'])
 async def login_view():
     if request.method == 'POST':
         login = request.form['login']
         password = request.form['password']
-
         async with async_session() as db_session:
             async with db_session.begin():
                 user = await db_session.execute(select(User).filter_by(login=login))
@@ -144,9 +153,10 @@ async def login_view():
             return redirect(url_for('index'))
         else:
             flash('Неправильний логін або пароль!')
-            return redirect(url_for('login'))
+            return redirect(url_for('login_view'))
 
     return render_template('login.html')
+
 
 @app.route('/create', methods=['GET', 'POST'])
 async def create_gratitude():
@@ -154,10 +164,9 @@ async def create_gratitude():
         content = request.form.get('content')
         image = request.files.get('image')
         user_id = session.get('user_id')
-
         is_public = request.form.get('is_public') is not None 
-
         image_url = None
+
         if image:
             image_folder = os.path.join('static', 'images')
             if not os.path.exists(image_folder):
@@ -195,6 +204,205 @@ async def global_gratitudes():
             gratitudes = gratitudes.scalars().all()
 
     return render_template('global.html', gratitudes=gratitudes)
+
+
+@app.route('/edit_profile', methods=['GET', 'POST'])
+async def edit_profile():
+    user_id = session.get('user_id')
+    if not user_id:
+        flash('Спершу увійдіть до системи!')
+        return redirect(url_for('login_view'))
+
+    async with async_session() as db_session:
+
+        user = await db_session.execute(select(User).filter_by(id=user_id))
+        user = user.scalar_one_or_none()
+
+        if not user:
+            flash('Користувач не знайдений!')
+            return redirect(url_for('index'))
+
+        errors = {}
+        if request.method == 'POST':
+            current_password = request.form['current_password']
+            first_name = request.form.get('first_name', '').strip()
+            last_name = request.form.get('last_name', '').strip()
+            login = request.form.get('login', '').strip()
+            email = request.form.get('email', '').strip()
+            password = request.form.get('password', '').strip()
+            confirm_password = request.form.get('confirm_password', '').strip()
+
+            if not check_password_hash(user.password, current_password):
+                errors['current_password'] = 'Неправильний поточний пароль!'
+
+            if first_name and not is_valid_name(first_name):
+                errors['first_name'] = 'Ім\'я повинно містити лише букви!'
+            if last_name and not is_valid_name(last_name):
+                errors['last_name'] = 'Прізвище повинно містити лише букви!'
+
+            if not is_valid_login(login):
+                errors['login'] = 'Логін повинен містити лише латинські букви та цифри, без пробілів!'
+            else:
+                existing_user = await db_session.execute(select(User).filter_by(login=login))
+                existing_user = existing_user.scalar_one_or_none()
+                if existing_user and existing_user.id != user.id:
+                    errors['login'] = 'Такий логін уже використовується!'
+
+            if not is_valid_email(email):
+                errors['email'] = 'Неправильний формат пошти!'
+            else:
+                existing_user = await db_session.execute(select(User).filter_by(email=email))
+                existing_user = existing_user.scalar_one_or_none()
+                if existing_user and existing_user.id != user.id:
+                    errors['email'] = 'Ця пошта вже використовується іншим користувачем!'
+
+            if password:
+                if not is_valid_password(password):
+                    errors['password'] = 'Пароль не відповідає вимогам!'
+                if password != confirm_password:
+                    errors['confirm_password'] = 'Паролі не співпадають!'
+
+            if not errors:
+                user.first_name = first_name or user.first_name
+                user.last_name = last_name or user.last_name
+                user.login = login or user.login
+                user.email = email or user.email
+                if password:
+                    user.password = generate_password_hash(password)
+
+                db_session.add(user)
+                await db_session.commit()
+
+                flash('Зміни збережені!')
+                return redirect(url_for('index'))
+
+        return render_template('edit_profile.html', user=user, errors=errors)
+
+@app.route('/friends', methods=['GET', 'POST'])
+async def friends():
+    user_id = session.get('user_id')
+    if not user_id:
+        flash('Спершу увійдіть до системи!')
+        return redirect(url_for('login_view'))
+
+    if request.method == 'POST':
+        nickname = request.form['nickname'].strip()
+        async with async_session() as db_session:
+            try:
+                result = await db_session.execute(select(User).filter_by(login=nickname))
+                friend = result.scalar_one_or_none()
+
+                if friend:
+                    if friend.id == user_id:
+                        return redirect(url_for('user_profile', user_id=user_id))
+                    else:
+                        return redirect(url_for('user_profile', user_id=friend.id))
+                else:
+                    flash('Користувача не знайдено!')
+            except Exception as e:
+                flash('Виникла помилка при пошуку користувача.')
+
+    return render_template('friends.html')
+
+@app.route('/profile')
+async def profile():
+    user_id = session.get('user_id')
+    if not user_id:
+        flash('Спершу увійдіть до системи!')
+        return redirect(url_for('login_view'))
+
+    today = datetime.utcnow().date() 
+    async with async_session() as db_session:
+        user_result = await db_session.execute(select(User).filter_by(id=user_id))
+        user = user_result.scalar_one_or_none()
+
+        if user is None:
+            flash('Користувача не знайдено!')
+            return redirect(url_for('index'))
+
+        gratitude_entries = await db_session.execute(
+            select(Gratitude).filter_by(user_id=user_id).filter(Gratitude.created_at >= today)
+        )
+        todays_gratitudes = gratitude_entries.scalars().all()
+
+    return render_template('profile.html', user=user, todays_gratitudes=todays_gratitudes)
+
+
+
+@app.route('/user/<int:user_id>', methods=['GET', 'POST'])
+async def user_profile(user_id):
+    current_user_id = session.get('user_id')
+    if not current_user_id:
+        flash('Спершу увійдіть до системи!')
+        return redirect(url_for('login_view'))
+
+    async with async_session() as db_session:
+        user = await db_session.execute(select(User).filter_by(id=user_id))
+        user = user.scalar_one_or_none()
+
+        if user is None:
+            flash('Користувача не знайдено!')
+            return redirect(url_for('feed')) 
+
+        if request.method == 'POST':
+
+            if current_user_id == user.id:
+                flash('Ви не можете додати себе в друзі!')
+            else:
+                existing_friendship = await db_session.execute(
+                    select(Friendship).filter_by(user_id=current_user_id, friend_user_id=user.id)
+                )
+                if not existing_friendship.scalar_one_or_none():
+                    new_friendship = Friendship(user_id=current_user_id, friend_user_id=user.id)
+                    db_session.add(new_friendship)
+                    await db_session.commit()
+                    flash('Користувача додано до друзів!')
+                else:
+                    flash('Користувач вже є у вашому списку друзів!')
+
+
+        gratitudes = await db_session.execute(
+            select(Gratitude).options(selectinload(Gratitude.user)).filter_by(user_id=user_id)
+        )
+        gratitudes = gratitudes.scalars().all()
+
+    return render_template('user_profile.html', user=user, gratitudes=gratitudes)
+
+@app.route('/search_users')
+async def search_users():
+    query = request.args.get('query', '').strip()
+    async with async_session() as db_session:
+        results = await db_session.execute(
+            select(User).filter(User.login.ilike(f'%{query}%'))
+        )
+        users = results.scalars().all()
+        
+    return jsonify([{'id': user.id, 'login': user.login} for user in users])
+
+@app.route('/feed')
+async def feed():
+    user_id = session.get('user_id')
+    if not user_id:
+        flash('Спершу увійдіть до системи!')
+        return redirect(url_for('login_view'))
+
+    async with async_session() as db_session:
+        # Fetch friends' IDs
+        friendships = await db_session.execute(
+            select(Friendship).filter_by(user_id=user_id)
+        )
+        friend_ids = [friendship.friend_user_id for friendship in friendships.scalars().all()]
+
+        # Fetch gratitudes from friends
+        gratitudes = await db_session.execute(
+            select(Gratitude).filter(Gratitude.user_id.in_(friend_ids)).filter(Gratitude.is_public == True)
+            .options(selectinload(Gratitude.user))
+            .order_by(Gratitude.created_at.desc())
+        )
+        gratitudes = gratitudes.scalars().all()
+
+    return render_template('feed.html', gratitudes=gratitudes)
+
 
 if __name__ == '__main__':
     asyncio.run(create_db())

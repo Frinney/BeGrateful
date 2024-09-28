@@ -13,15 +13,49 @@
     <nav class="header__navigation">
       <ul class="header__navigation-group header__navigation-group--left">
         <li class="header__navigation-item header__navigation-item--friends">
-          <a href="{{ url_for('index') }}">
-            <img src="{{ url_for('static', filename='icons/friends-icon.svg') }}" alt="Friends Icon">
+          <a href="#" id="friendsIcon">
+              <img src="{{ url_for('static', filename='icons/friends-icon.svg') }}" alt="Friends Icon">
           </a>
-        </li>
+      </li>
+      
+      
         <li class="header__navigation-item header__navigation-item--global">
           <a href="{{ url_for('global_gratitudes') }}">
-            <img src="{{ url_for('static', filename='icons/global-icon.svg') }}" alt="Global Icon">
+              <img src="{{ url_for('static', filename='icons/global-icon.svg') }}" alt="Global Icon">
           </a>
-        </li>
+      </li>
+      
+      <div id="friendsModal" class="modal">
+          <div class="modal-content">
+              <span id="closeFriendsModalBtn" class="close">&times;</span>
+              
+              <h1 class="h1_find_friends">Пошук друзів</h1>
+              <form method="POST" action="{{ url_for('friends') }}">
+                  <input type="text" class="input_modal" id="nickname" name="nickname" placeholder="Нікнейм" required autocomplete="off">
+                  <div id="suggestions" class="suggestions"></div> 
+              </form>
+              
+              {% with messages = get_flashed_messages() %}
+                  {% if messages %}
+                      <ul class="flashes">
+                          {% for message in messages %}
+                              <li>{{ message }}</li>
+                          {% endfor %}
+                      </ul>
+                  {% endif %}
+              {% endwith %}
+              
+              <ul>
+                  {% for friend in friends %}
+                      <li>
+                          <a href="{{ url_for('user_profile', user_id=friend.friend_user_id) }}">
+                              {{ friend.friend_user.login }}
+                          </a>
+                      </li>
+                  {% endfor %}
+              </ul>
+          </div>
+      </div>
       </ul>
 
       <img src="{{ url_for('static', filename='icons/logo.svg') }}" alt="Logo Icon" class="header__logo">
@@ -31,8 +65,11 @@
           <img src="{{ url_for('static', filename='icons/calendar-icon.svg') }}" alt="Archive Icon">
         </li>
         <li class="header__navigation-item header__navigation-item--profile">
-          <img src="{{ url_for('static', filename='images/profile-image.jpg') }}" alt="Profile Image">
+          <a href="{{ url_for('profile') }}">
+            <img src="{{ url_for('static', filename='imagesforcss/profile-image.jpg') }}" alt="Profile Image">
+          </a>
         </li>
+        
       </ul>
     </nav>
   </header>
@@ -67,8 +104,9 @@
   <footer class="footer">
     <div id="footer"></div>
   </footer>
-
   <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/gratitude.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/search.js') }}"></script>
 </body>
 
 </html>

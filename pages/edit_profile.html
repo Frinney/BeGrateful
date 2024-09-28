@@ -1,0 +1,40 @@
+<!-- edit_profile.html -->
+<form method="POST">
+    <label for="current_password">Поточний пароль (обов'язковий для змін):</label>
+    <input type="password" name="current_password" required>
+    <br>    
+    <br>
+    <label for="first_name">Ім'я (зараз: {{ user.first_name or 'не встановлено' }}):</label>
+    <input type="text" name="first_name" value="{{ user.first_name }}">
+    <br>    
+    <br>
+    <label for="last_name">Прізвище (зараз: {{ user.last_name or 'не встановлено' }}):</label>
+    <input type="text" name="last_name" value="{{ user.last_name }}">
+    <br>   
+     <br>
+    <label for="login">Логін (зараз: {{ user.login }}):</label>
+    <input type="text" name="login" value="{{ user.login }}">
+    <br>    
+    <br>
+    <label for="email">Пошта (зараз: {{ user.email }}):</label>
+    <input type="email" name="email" value="{{ user.email }}">
+    <br>    
+    <br>
+    <label for="password">Новий пароль (якщо змінюється):</label>
+    <input type="password" name="password">
+    <br>    
+    <br>
+    <label for="confirm_password">Підтвердіть новий пароль:</label>
+    <input type="password" name="confirm_password">
+    <br>   
+     <br>
+    <button type="submit">Зберегти зміни</button>
+</form>
+
+{% if errors %}
+    <ul>
+        {% for field, error in errors.items() %}
+            <li>{{ error }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}

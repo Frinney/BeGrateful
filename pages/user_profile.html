@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="uk">
+<head>
+    <meta charset="utf-8">
+    <title>Профіль користувача {{ user.login }}</title>
+</head>
+<body>
+    <h1>Профіль користувача {{ user.login }}</h1>
+    <h2>Благодарності:</h2>
+    <ul>
+        {% for gratitude in gratitudes %}
+            <li>
+                <p>{{ gratitude.content }}</p>
+                {% if gratitude.image_url %}
+                    <img src="{{ url_for('static', filename=gratitude.image_url) }}" alt="Gratitude Image">
+                {% endif %}
+                <p>Дата: {{ gratitude.created_at }}</p>
+            </li>
+        {% else %}
+            <li>Немає жодної благодарності.</li>
+        {% endfor %}
+    </ul>
+    <form method="POST" action="">
+        <button type="submit">Додати в друзі</button>
+    </form>
+    <a href="{{ url_for('index') }}">Назад на головну</a>
+</body>
+</html>

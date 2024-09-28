@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профіль користувача</title>
+    <style>
+        .gratitude {
+            margin-bottom: 20px;
+        }
+        .gratitude img {
+            max-width: 150px; /* Установка максимальной ширины для изображений */
+            height: auto; /* Автоматическая высота */
+        }
+    </style>
+</head>
+<body>
+    <h1>Профіль: {{ user.login }}</h1>
+    
+    <h2>Сьогоднішні подяки:</h2>
+    {% if todays_gratitudes %}
+        <ul>
+            {% for gratitude in todays_gratitudes %}
+                <li class="gratitude">
+                    <p>{{ gratitude.content }}</p>
+                    {% if gratitude.image_url %}
+                        <img src="{{ url_for('static', filename=gratitude.image_url) }}" alt="Фотографія" />
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Немає сьогоднішніх подяк.</p>
+    {% endif %}
+    
+    <a href="{{ url_for('index') }}">На головну</a>
+</body>
+</html>
