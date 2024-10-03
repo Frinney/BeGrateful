@@ -5,31 +5,75 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Логін</title>
 </head>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles1.css') }}">
+    <title>BeGrateful</title>
+    <style>
+        .input-error {
+            box-shadow: 0 0 5px 2px red;
+        }
+
+        .input-normal {
+            box-shadow: 5px 6px 0px #C1CFFF;
+        }
+
+        .flash-messages {
+            color: red;
+        }
+    </style>
+</head>
+
 <body>
-    <h1>Логін користувача</h1>
-    
-    <form action="/login" method="POST">
-        <label for="login">Логін:</label>
-        <input type="text" id="login" name="login" required>
-        <br><br>
+    <header class="header">
+        <nav class="header__navigation">
 
-        <label for="password">Пароль:</label>
-        <input type="password" id="password" name="password" required>
-        <button type="button" onclick="togglePassword('password')">Показати</button>
-        <br><br>
+            <img src="{{ url_for('static', filename='icons/logo.svg') }}" alt="Logo Icon" class="header__logo">
 
-        <button type="submit">Увійти</button>
-    </form>
+        </nav>
+    </header>
 
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <ul>
-            {% for message in messages %}
-                <li>{{ message }}</ li>
-            {% endfor %}
-            </ul>
-        {% endif %}
-    {% endwith %}
+    <main class="main">
+        <div class="formReg">
+            <h1 class="formReg__title">Вхід</h1>
+
+            <form action="/login" method="POST">
+
+                <div class="logAndMail">
+                    <label for="login">Логін*</label>
+                    <input type="text" id="login" name="login" class="{{ 'input-error' if errors.get('login') else 'input-normal' }}" required value="{{ request.form.login }}">
+                </div>
+
+                <div class="classNameAndPass">
+                
+                    <div class="nameAndPass1">
+                        <label for="password">Пароль*</label>
+                        <input type="password" id="password" name="password" class="{{ 'input-error' if errors.get('password') else 'input-normal' }}" required>
+                        {% if errors.get('password') %}
+                            <p class="error-message">{{ errors['password'] }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <button type="submit">Вхід</button>
+
+                {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                <ul class="flash-messages">
+                    {% for message in messages %}
+                    <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                {% endwith %}
+            </form>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div id="footer"></div>
+    </footer>
 
     <script>
         function togglePassword(fieldId) {

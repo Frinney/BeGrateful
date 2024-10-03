@@ -45,7 +45,7 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
 }
 
 .header__navigation-group {
@@ -61,7 +61,6 @@
 
 .header__navigation-item--global {}
 
-.header__logo {}
 
 .header__navigation-item--archive {}
 
@@ -94,7 +93,7 @@ form {
 }
 
 
-h1[type='reg'] {
+h1[class='formReg__title'] {
     font-family: 'Manrope', sans-serif;
     margin-left: auto;
     margin-right: auto;
@@ -111,12 +110,6 @@ h1[type='reg'] {
 }
 
 
-
-.header__navigation {
-    width: 100%; 
-    display: flex;
-    justify-content: center;
-}
 
 .header__logo {
     max-width: 100%;
@@ -190,11 +183,10 @@ button[type="submit"]{
     background-color: #BDCCFF;
     width: 224px;
     height: 73px;
-    padding: 20px 36px 20px 36px;
     gap: 10px;
     border-radius: 14px;
     opacity: 0px;
-    font-family: 'Monrope';
+    font-family: 'Manrope';
     font-size: 24px;
     font-weight: 800;
     margin-top: 38px;
@@ -203,6 +195,45 @@ button[type="submit"]{
 :active, :hover, :focus {
     outline: 0;
     outline-offset: 0;
+}
+
+.password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 10px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.input-normal {
+    padding-right: 30px; /* чтобы иконка не перекрывала текст */
+}
+
+.input-error {
+    border-color: red;
+    padding-right: 30px;
+}
+
+.global {
+    margin-inline: 22px;
+}
+.globel-title {
+}
+
+.global_gratitude {
+}
+.global__gratitude_content {
+}
+.global_gratitude_image {
+}
+.global__gratitude_title {
+}
+.global__gratitude_description {
 }
 
 

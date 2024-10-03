@@ -5,49 +5,116 @@
     <title>Global Gratitudes</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: Manrope, sans-serif;
             margin: 20px;
-        }
-        div {
-            margin-bottom: 20px;
-            border: 1px solid #ccc;
-            padding: 10px;
-            border-radius: 5px;
-        }
-        img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 5px;
-        }
-        h1 {
-            color: #333;
-        }
-        .author {
-            font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <h1>Публічні подяки</h1>    
-    {% if gratitudes %}
-        {% for gratitude in gratitudes %}
-            <div>
-                <p>{{ gratitude.content }}</p>
-                {% if gratitude.image_url %}
-                    <img src="{{ url_for('static', filename=gratitude.image_url) }}" alt="Gratitude Image">
-                {% endif %}
-                <p class="author">
-                    <strong>Автор:</strong> 
-                    {% if gratitude.user %}
-                        {{ gratitude.user.login }}
-                    {% else %}
-                        Невідомий 
-                    {% endif %}
-                </p>
+    <!DOCTYPE html>
+    <html lang="uk">
+    
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+      <title>BeGrateful</title>
+    </head>
+    
+    <body>
+      <header class="header">
+        <nav class="header__navigation">
+          <ul class="header__navigation-group header__navigation-group--left">
+            <li class="header__navigation-item header__navigation-item--friends">
+              <a href="#" id="friendsIcon">
+                  <img src="{{ url_for('static', filename='icons/friends-icon.svg') }}" alt="Friends Icon">
+              </a>
+          </li>
+          
+          
+            <li class="header__navigation-item header__navigation-item--global">
+              <a href="{{ url_for('global_gratitudes') }}">
+                  <img src="{{ url_for('static', filename='icons/global-icon.svg') }}" alt="Global Icon">
+              </a>
+          </li>
+          
+          <div id="friendsModal" class="modal">
+              <div class="modal-content">
+                  <span id="closeFriendsModalBtn" class="close">&times;</span>
+                  
+                  <h1 class="h1_find_friends">Пошук друзів</h1>
+                  <form method="POST" action="{{ url_for('friends') }}">
+                      <input type="text" class="input_modal" id="nickname" name="nickname" placeholder="Нікнейм" required autocomplete="off">
+                      <div id="suggestions" class="suggestions"></div> 
+                  </form>
+                  
+                  {% with messages = get_flashed_messages() %}
+                      {% if messages %}
+                          <ul class="flashes">
+                              {% for message in messages %}
+                                  <li>{{ message }}</li>
+                              {% endfor %}
+                          </ul>
+                      {% endif %}
+                  {% endwith %}
+                  
+                  <ul>
+                      {% for friend in friends %}
+                          <li>
+                              <a href="{{ url_for('user_profile', user_id=friend.friend_user_id) }}">
+                                  {{ friend.friend_user.login }}
+                              </a>
+                          </li>
+                      {% endfor %}
+                  </ul>
+              </div>
+          </div>
+          </ul>
+    
+          <img src="{{ url_for('static', filename='icons/logo.svg') }}" alt="Logo Icon" class="header__logo">
+    
+          <ul class="header__navigation-group header__navigation-group--right">
+            <li class="header__navigation-item header__navigation-item--archive">
+              <img src="{{ url_for('static', filename='icons/calendar-icon.svg') }}" alt="Archive Icon">
+            </li>
+            <li class="header__navigation-item header__navigation-item--profile">
+              <a href="{{ url_for('profile') }}">
+                <img src="{{ url_for('static', filename='imagesforcss/profile-image.jpg') }}" alt="Profile Image">
+              </a>
+            </li>
+            
+          </ul>
+        </nav>
+      </header>
+
+      <section class="global">  
+        <h1 class="globel-title">За що вдячен світ</h1>
+        
+        {% if gratitudes %}
+            {% for gratitude in gratitudes %}
+            <div class="global_gratitude">
+                <div class="global__gratitude_content">
+                    <!-- Статичная картинка аватара -->
+                    <img src="{{ url_for('static', filename='imagesforcss/profile-image.jpg') }}" alt="" class="global_gratitude_image">
+                    
+                    <div class="global__gratitude_text">
+                        <!-- Динамический автор благодарности -->
+                        <h3 class="global__gratitude_title">{{ gratitude.user.login if gratitude.user else 'Невідомий' }}</h3>
+                        
+                        <!-- Динамическое содержимое благодарности -->
+                        <p class="global__gratitude_description">{{ gratitude.content }}</p>
+
+                        {% if gratitude.image_url %}
+                        <img src="{{ url_for('static', filename=gratitude.image_url) }}" class="gratitude_image" alt="Gratitude Image">
+                        {% endif %}
+                    </div>
+                </div>
             </div>
-        {% endfor %}
-    {% else %}
-        <p>Немає публічних подяк.</p>
-    {% endif %}
+            {% endfor %}
+        {% else %}
+            <p>Немає публічних подяк.</p>
+        {% endif %}
+    </section>
+    
 </body>
 </html>

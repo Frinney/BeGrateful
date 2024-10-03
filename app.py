@@ -139,24 +139,33 @@ async def register():
 
 @app.route('/login', methods=['GET', 'POST'])
 async def login_view():
+    errors = {}  # Создаем словарь для ошибок
+
     if request.method == 'POST':
-        login = request.form['login']
-        password = request.form['password']
-        async with async_session() as db_session:
-            async with db_session.begin():
-                user = await db_session.execute(select(User).filter_by(login=login))
-                user = user.scalar_one_or_none()
+        login = request.form.get('login')
+        password = request.form.get('password')
 
-        if user and check_password_hash(user.password, password):
-            session['user_id'] = user.id
-            flash('Ви успішно увійшли в систему!')
-            return redirect(url_for('index'))
-        else:
-            flash('Неправильний логін або пароль!')
-            return redirect(url_for('login_view'))
+        # Проверка на наличие данных
+        if not login:
+            errors['login'] = 'Поле логина не может быть пустым'
+        if not password:
+            errors['password'] = 'Поле пароля не может быть пустым'
 
-    return render_template('login.html')
+        if not errors:  # Если нет ошибок, продолжаем проверку пользователя
+            async with async_session() as db_session:
+                async with db_session.begin():
+                    user = await db_session.execute(select(User).filter_by(login=login))
+                    user = user.scalar_one_or_none()
 
+            if user and check_password_hash(user.password, password):
+                session['user_id'] = user.id
+                flash('Ви успішно увійшли в систему!')
+                return redirect(url_for('index'))
+            else:
+                errors['login'] = 'Неправильний логін або пароль!'
+
+    # Если есть ошибки или метод GET
+    return render_template('login.html', errors=errors)
 
 @app.route('/create', methods=['GET', 'POST'])
 async def create_gratitude():

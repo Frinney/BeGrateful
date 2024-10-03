@@ -311,3 +311,44 @@ li {
   color: black;
   cursor: pointer;
 }
+
+
+.global {
+  margin-inline: 22px;
+  padding: 35px 35px 100px 35px;
+  border-radius: 22px;
+  background-color: #fff;
+}
+.globel-title {
+}
+
+.global_gratitude {
+  margin-block: 20px;
+}
+.global__gratitude_content {
+  display: flex;
+  background-color: #EFF3FF;
+  padding: 27px;
+  border-radius: 14px;
+  box-shadow: 5px 6px #E8EDFF;
+
+}
+.global_gratitude_image {
+  object-fit: contain;
+}
+.global__gratitude_title {
+  margin-block: 2px;
+}
+.global__gratitude_description {
+  margin-block: 2px;
+}
+
+.global__gratitude_text{
+  margin-left: 10px;
+}
+
+.gratitude_image{
+  width: 300px;
+  height: 150px;
+  border-radius:11px;
+}

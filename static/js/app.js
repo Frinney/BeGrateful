@@ -29,3 +29,15 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+
+function togglePassword(fieldId, toggleIcon) {
+    const passwordField = document.getElementById(fieldId);
+    if (passwordField.type === "password") {
+        passwordField.type = "text";
+        toggleIcon.textContent = "🙈"; // Меняем иконку на "скрыть"
+    } else {
+        passwordField.type = "password";
+        toggleIcon.textContent = "👁️"; // Меняем иконку на "показать"
+    }
+}
