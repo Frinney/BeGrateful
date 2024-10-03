@@ -1,64 +1,23 @@
 import os
 import re
 import asyncio
+
 from flask import Flask, render_template, jsonify, request, redirect, url_for, flash, session
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import Column, Integer, String, Boolean, Text, ForeignKey
-from sqlalchemy.orm import relationship
+
 from sqlalchemy.future import select
-from sqlalchemy.orm import selectinload
-from sqlalchemy import DateTime
+from sqlalchemy.orm    import selectinload
+
+from data.tables       import init_db, BaseEngine, User, Gratitude, Friendship
+from data.queries.user import register_user, get_user_id, add_gratitude, get_gratitudes
+
 from datetime import datetime
+
 
 app = Flask(__name__, template_folder='pages')
 app.secret_key = 'your_secret_key'
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite+aiosqlite:///gratitudes.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-engine = create_async_engine(app.config['SQLALCHEMY_DATABASE_URI'], echo=True)
-async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
-
-db = SQLAlchemy(app)
-
-class User(db.Model):
-    __tablename__ = 'users'
-    id = Column(Integer, primary_key=True)
-    first_name = Column(String(50), nullable=True)
-    last_name = Column(String(50), nullable=True)
-    login = Column(String(50), unique=True, nullable=False)
-    email = Column(String(100), unique=True, nullable=False)
-    password = Column(String(200), nullable=False)
-    gratitudes = relationship('Gratitude', back_populates='user')
-
-class Gratitude(db.Model):
-    __tablename__ = 'gratitudes'
-    id = Column(Integer, primary_key=True)
-    content = Column(Text, nullable=False)
-    image_url = Column(String, nullable=True)
-    is_public = Column(Boolean, default=True)
-    user_id = Column(Integer, ForeignKey('users.id'))
-    user = relationship('User', back_populates='gratitudes')
-    created_at = Column(DateTime, default=datetime.utcnow)
-
-class Friendship(db.Model):
-    __tablename__ = 'friendships'
-    id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    friend_user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
-
-    user = relationship('User', foreign_keys=[user_id], backref='friends')
-    friend = relationship('User', foreign_keys=[friend_user_id], backref='friend_of')
-
-
-async def create_db():
-    async with engine.begin() as conn:
-        await conn.run_sync(db.metadata.create_all)
-
+ 
 def is_valid_email(email):
     return re.match(r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$', email)
 
@@ -119,18 +78,16 @@ async def register():
 
         if errors:
             return render_template('register.html', errors=errors, form=request.form)
+        
+        print(errors)
 
-        async with async_session() as session:
-            async with session.begin():
-                existing_user = await session.execute(select(User).filter_by(login=login))
-                if existing_user.scalars().first() is not None:
-                    errors['login'] = 'Такий користувач уже існує!'
-                    return render_template('register.html', errors=errors, form=request.form)
+        is_exist = await register_user(login, password, first_name, last_name, email)
+        if is_exist:
+            print("Такий користувач уже існує!")
+            errors['login'] = 'Такий користувач уже існує!'
 
-                hashed_password = generate_password_hash(password)
-                new_user = User(first_name=first_name, last_name=last_name, login=login, email=email, password=hashed_password)
-                session.add(new_user)
-            await session.commit()
+            return render_template('register.html', errors=errors, form=request.form)
+        print("Такий користувач уже існує!")
 
         flash('Реєстрація пройшла успішно!')
         return redirect(url_for('index'))
@@ -152,20 +109,19 @@ async def login_view():
             errors['password'] = 'Поле пароля не может быть пустым'
 
         if not errors:  # Если нет ошибок, продолжаем проверку пользователя
-            async with async_session() as db_session:
-                async with db_session.begin():
-                    user = await db_session.execute(select(User).filter_by(login=login))
-                    user = user.scalar_one_or_none()
+            user_id = await get_user_id(login, password)
 
-            if user and check_password_hash(user.password, password):
-                session['user_id'] = user.id
+            if user_id is not None:
+                session['user_id'] = user_id
                 flash('Ви успішно увійшли в систему!')
                 return redirect(url_for('index'))
-            else:
-                errors['login'] = 'Неправильний логін або пароль!'
+           
+            flash('Неправильний логін або пароль!')
+            return redirect(url_for('login_view'))
 
     # Если есть ошибки или метод GET
     return render_template('login.html', errors=errors)
+
 
 @app.route('/create', methods=['GET', 'POST'])
 async def create_gratitude():
@@ -184,16 +140,12 @@ async def create_gratitude():
             image.save(image_path)
             image_url = f'images/{image.filename}'
 
-        async with async_session() as db_session:
-            async with db_session.begin():
-                new_gratitude = Gratitude(
-                    content=content,
-                    image_url=image_url,
-                    is_public=is_public, 
-                    user_id=user_id
-                )
-                db_session.add(new_gratitude)
-            await db_session.commit()
+        await add_gratitude(
+            content,
+            image_url,
+            is_public, 
+            user_id
+        )
 
         flash('Подяка створена!', 'success')  
         return redirect(url_for('index'))
@@ -202,15 +154,7 @@ async def create_gratitude():
 
 @app.route('/global')
 async def global_gratitudes():
-    async with async_session() as db_session:
-        async with db_session.begin():
-            gratitudes = await db_session.execute(
-                select(Gratitude)
-                .filter_by(is_public=True)
-                .options(selectinload(Gratitude.user))
-                .order_by(Gratitude.created_at.desc()) 
-            )
-            gratitudes = gratitudes.scalars().all()
+    gratitudes = await get_gratitudes()
 
     return render_template('global.html', gratitudes=gratitudes)
 
@@ -222,7 +166,7 @@ async def edit_profile():
         flash('Спершу увійдіть до системи!')
         return redirect(url_for('login_view'))
 
-    async with async_session() as db_session:
+    async with BaseEngine.async_session() as db_session: #edit
 
         user = await db_session.execute(select(User).filter_by(id=user_id))
         user = user.scalar_one_or_none()
@@ -296,7 +240,7 @@ async def friends():
 
     if request.method == 'POST':
         nickname = request.form['nickname'].strip()
-        async with async_session() as db_session:
+        async with BaseEngine.async_session() as db_session: #edit
             try:
                 result = await db_session.execute(select(User).filter_by(login=nickname))
                 friend = result.scalar_one_or_none()
@@ -321,7 +265,7 @@ async def profile():
         return redirect(url_for('login_view'))
 
     today = datetime.utcnow().date() 
-    async with async_session() as db_session:
+    async with BaseEngine.async_session() as db_session: #edit
         user_result = await db_session.execute(select(User).filter_by(id=user_id))
         user = user_result.scalar_one_or_none()
 
@@ -345,7 +289,7 @@ async def user_profile(user_id):
         flash('Спершу увійдіть до системи!')
         return redirect(url_for('login_view'))
 
-    async with async_session() as db_session:
+    async with BaseEngine.async_session() as db_session: #edit
         user = await db_session.execute(select(User).filter_by(id=user_id))
         user = user.scalar_one_or_none()
 
@@ -380,7 +324,7 @@ async def user_profile(user_id):
 @app.route('/search_users')
 async def search_users():
     query = request.args.get('query', '').strip()
-    async with async_session() as db_session:
+    async with BaseEngine.async_session() as db_session: #edit
         results = await db_session.execute(
             select(User).filter(User.login.ilike(f'%{query}%'))
         )
@@ -395,7 +339,7 @@ async def feed():
         flash('Спершу увійдіть до системи!')
         return redirect(url_for('login_view'))
 
-    async with async_session() as db_session:
+    async with BaseEngine.async_session() as db_session: #edit
         # Fetch friends' IDs
         friendships = await db_session.execute(
             select(Friendship).filter_by(user_id=user_id)
@@ -414,5 +358,5 @@ async def feed():
 
 
 if __name__ == '__main__':
-    asyncio.run(create_db())
-    app.run(debug=True)
+    asyncio.run(init_db())
+    app.run(debug = True)
