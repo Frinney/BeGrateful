@@ -352,3 +352,114 @@ li {
   height: 150px;
   border-radius:11px;
 }
+
+
+.profile {
+  margin-inline: 115px;
+  
+}
+
+.profile-header::before {
+  content: '';
+  position: absolute;
+  border-top-left-radius: 28px;
+  border-top-right-radius: 28px;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5); /* Полупрозрачный черный цвет для затемнения */
+  z-index: 1; /* Затемнение над изображением */
+}
+
+.profile-header {
+  background-image: url('/static/imagesforcss/profile-image.jpg'); /* Укажи путь к фоновому изображению */
+  
+  font-family: 'Manrope', sans-serif;
+  background-size: cover;
+  background-position: center;
+  border-top-left-radius: 28px;
+  border-top-right-radius: 28px;
+  color: white;
+  position: relative; /* Для абсолютного позиционирования текста "Профіль" */
+  height: 150px; /* Регулируй по необходимости */
+  padding: 35px;
+}
+
+.profile-header-text {
+  font-weight: 600;
+  z-index: 2;
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  font-size: 36px;
+  font-weight: bold;
+  margin: 0;
+}
+
+/* Центрирование имени и юзернейма */
+.profile-header-name, .profile-header-username {
+  text-align: center;
+  margin: 0;
+}
+
+.profile-header-name {
+  font-size: 32px;
+  font-weight: 600;
+}
+
+.profile-header-username {
+  font-size: 24px;
+  z-index: 2;
+  margin: 0;
+  color: #d3d3d3;
+}
+
+.profile-header-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%; 
+}
+
+
+
+.profile-header-name {
+  z-index: 2;
+  font-size: 32px;
+  margin: 0;
+}
+.profile-header-username {
+}
+.add-friend {
+  margin: 30px;
+  padding-inline: 23px;
+  padding-block: 18px;
+  border: none;
+  background-color: #F0F0F0;
+  border-radius: 15px;
+  width: 240px;
+  font-size: 24px;
+}
+.profile-daily-gratitude {
+  font-family: 'Manrope', sans-serif;
+  padding: 30px;
+  background-color: #f1f1f1;
+}
+.daily-gratitude-title {
+  margin-block: 4px;
+}
+.daily-gratitude-description {
+  margin-block: 4px;
+}
+
+.profile-image{
+  width: 44px;
+  height: 44px;
+  border-radius: 100px;
+}
+
+.profile-user-content {
+  background-color: #fff;
+}

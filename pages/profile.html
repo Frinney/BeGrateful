@@ -1,38 +1,97 @@
 <!DOCTYPE html>
 <html lang="uk">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Профіль користувача</title>
-    <style>
-        .gratitude {
-            margin-bottom: 20px;
-        }
-        .gratitude img {
-            max-width: 150px; /* Установка максимальной ширины для изображений */
-            height: auto; /* Автоматическая высота */
-        }
-    </style>
-</head>
-<body>
-    <h1>Профіль: {{ user.login }}</h1>
-    
-    <h2>Сьогоднішні подяки:</h2>
-    {% if todays_gratitudes %}
-        <ul>
-            {% for gratitude in todays_gratitudes %}
-                <li class="gratitude">
-                    <p>{{ gratitude.content }}</p>
-                    {% if gratitude.image_url %}
-                        <img src="{{ url_for('static', filename=gratitude.image_url) }}" alt="Фотографія" />
-                    {% endif %}
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>Немає сьогоднішніх подяк.</p>
-    {% endif %}
-    
-    <a href="{{ url_for('index') }}">На головну</a>
-</body>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+        <title>BeGrateful</title>
+      </head>
+      
+      <body>
+        <header class="header">
+          <nav class="header__navigation">
+            <ul class="header__navigation-group header__navigation-group--left">
+              <li class="header__navigation-item header__navigation-item--friends">
+                <a href="#" id="friendsIcon">
+                    <img src="{{ url_for('static', filename='icons/friends-icon.svg') }}" alt="Friends Icon">
+                </a>
+            </li>
+            
+            
+              <li class="header__navigation-item header__navigation-item--global">
+                <a href="{{ url_for('global_gratitudes') }}">
+                    <img src="{{ url_for('static', filename='icons/global-icon.svg') }}" alt="Global Icon">
+                </a>
+            </li>
+            
+            <div id="friendsModal" class="modal">
+                <div class="modal-content">
+                    <span id="closeFriendsModalBtn" class="close">&times;</span>
+                    
+                    <h1 class="h1_find_friends">Пошук друзів</h1>
+                    <form method="POST" action="{{ url_for('friends') }}">
+                        <input type="text" class="input_modal" id="nickname" name="nickname" placeholder="Нікнейм" required autocomplete="off">
+                        <div id="suggestions" class="suggestions"></div> 
+                    </form>
+                    
+                    {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                            <ul class="flashes">
+                                {% for message in messages %}
+                                    <li>{{ message }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    {% endwith %}
+                    
+                    <ul>
+                        {% for friend in friends %}
+                            <li>
+                                <a href="{{ url_for('user_profile', user_id=friend.friend_user_id) }}">
+                                    {{ friend.friend_user.login }}
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            </ul>
+      
+            <img src="{{ url_for('static', filename='icons/logo.svg') }}" alt="Logo Icon" class="header__logo">
+      
+            <ul class="header__navigation-group header__navigation-group--right">
+              <li class="header__navigation-item header__navigation-item--archive">
+                <img src="{{ url_for('static', filename='icons/calendar-icon.svg') }}" alt="Archive Icon">
+              </li>
+              <li class="header__navigation-item header__navigation-item--profile">
+                <a href="{{ url_for('profile') }}">
+                  <img src="{{ url_for('static', filename='imagesforcss/profile-image.jpg') }}" class="profile-image" alt="Profile Image">
+                </a>
+              </li>
+              
+            </ul>
+          </nav>
+        </header>
+        <section class="profile">
+            <div class="profile-header">
+                <h1 class="profile-header-text">Профіль</h1>
+                <div class="profile-header-content">
+                    <h2 class="profile-header-name">Max Tkach</h2>
+                    <p class="profile-header-username">maxtkach44</p>
+                </div>
+            </div>
+            <div class="profile-user-content">
+                <button class="add-friend">Додати в друзі</button>
+
+                <div class="profile-daily-gratitude">
+                    <h2 class="daily-gratitude-title">
+                        Подяка дня
+                    </h2>
+                    <p class="daily-gratitude-description">
+                        Я вдячен за все
+                    </p>
+                </div>
+            </div>
+        </section>
+        </body>
 </html>
