@@ -96,19 +96,18 @@ async def register():
 
 @app.route('/login', methods=['GET', 'POST'])
 async def login_view():
-    errors = {}  # Создаем словарь для ошибок
+    errors = {}
 
     if request.method == 'POST':
         login = request.form.get('login')
         password = request.form.get('password')
 
-        # Проверка на наличие данных
         if not login:
             errors['login'] = 'Поле логина не может быть пустым'
         if not password:
             errors['password'] = 'Поле пароля не может быть пустым'
 
-        if not errors:  # Если нет ошибок, продолжаем проверку пользователя
+        if not errors: 
             user_id = await get_user_id(login, password)
 
             if user_id is not None:
@@ -119,7 +118,6 @@ async def login_view():
             flash('Неправильний логін або пароль!')
             return redirect(url_for('login_view'))
 
-    # Если есть ошибки или метод GET
     return render_template('login.html', errors=errors)
 
 
@@ -166,8 +164,7 @@ async def edit_profile():
         flash('Спершу увійдіть до системи!')
         return redirect(url_for('login_view'))
 
-    async with BaseEngine.async_session() as db_session: #edit
-
+    async with BaseEngine.async_session() as db_session:
         user = await db_session.execute(select(User).filter_by(id=user_id))
         user = user.scalar_one_or_none()
 
@@ -227,9 +224,11 @@ async def edit_profile():
                 await db_session.commit()
 
                 flash('Зміни збережені!')
-                return redirect(url_for('index'))
 
-        return render_template('edit_profile.html', user=user, errors=errors)
+                return render_template('profile.html', user=user, errors=errors, success='Зміни збережені!')
+
+        return render_template('profile.html', user=user, errors=errors)
+
 
 @app.route('/friends', methods=['GET', 'POST'])
 async def friends():

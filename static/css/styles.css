@@ -116,6 +116,7 @@ li {
   margin-right: 10px;
 }
 
+
 .gratitude__textarea {
   width: 100%;
   resize: none;
@@ -240,7 +241,7 @@ li {
 .modal {
   display: none; 
   position: fixed;
-  z-index: 1;
+  z-index: 100;
   left: 0;
   top: 0;
   width: 100%;
@@ -259,7 +260,7 @@ li {
 
 .input_modal {
   border: 0px solid #ccc;
-  border-radius: 14px; /* Keeping a consistent radius */
+  border-radius: 14px; 
   box-sizing: border-box;
   background-color: #EFF3FF;
   height: 56px;
@@ -296,7 +297,7 @@ li {
 }
 
 .suggestion-item:hover {
-  background-color: #f0f0f0; /* Цвет при наведении */
+  background-color: #f0f0f0; 
 }
 
 .close {
@@ -368,12 +369,12 @@ li {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5); /* Полупрозрачный черный цвет для затемнения */
-  z-index: 1; /* Затемнение над изображением */
+  background: rgba(0, 0, 0, 0.5); 
+  z-index: 1; 
 }
 
 .profile-header {
-  background-image: url('/static/imagesforcss/profile-image.jpg'); /* Укажи путь к фоновому изображению */
+  background-image: url('/static/imagesforcss/profile-image.jpg'); 
   
   font-family: 'Manrope', sans-serif;
   background-size: cover;
@@ -381,8 +382,8 @@ li {
   border-top-left-radius: 28px;
   border-top-right-radius: 28px;
   color: white;
-  position: relative; /* Для абсолютного позиционирования текста "Профіль" */
-  height: 150px; /* Регулируй по необходимости */
+  position: relative; 
+  height: 150px; 
   padding: 35px;
 }
 
@@ -397,7 +398,6 @@ li {
   margin: 0;
 }
 
-/* Центрирование имени и юзернейма */
 .profile-header-name, .profile-header-username {
   text-align: center;
   margin: 0;
@@ -442,6 +442,26 @@ li {
   width: 240px;
   font-size: 24px;
 }
+.edit-profile {
+  margin: 30px;
+  padding-inline: 23px;
+  padding-block: 18px;
+  border: none;
+  background-color: #F0F0F0;
+  border-radius: 15px;
+  width: 240px;
+  font-size: 24px;
+}
+.edit- {
+  margin: 30px;
+  padding-inline: 23px;
+  padding-block: 18px;
+  border: none;
+  background-color: #F0F0F0;
+  border-radius: 15px;
+  width: 240px;
+  font-size: 24px;
+}
 .profile-daily-gratitude {
   font-family: 'Manrope', sans-serif;
   padding: 30px;
@@ -462,4 +482,53 @@ li {
 
 .profile-user-content {
   background-color: #fff;
+}
+
+.modal-edit {
+  font-family: 'Manrope';
+  display: none; 
+  position: fixed; 
+  z-index: 10; 
+  padding-top: 100px; 
+  left: 0;
+  top: 0;
+  width: 100%; 
+  height: 100%; 
+  background-color: rgba(0, 0, 0, 0.4); 
+}
+
+
+.modal-edit-content {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #888;
+  width: 80%;
+}
+
+.input-modal-edit{
+  border: 0px solid #ccc;
+  border-radius: 14px;
+  box-sizing: border-box;
+  background-color: #EFF3FF;
+  height: 56px;
+  box-shadow: 5px 6px 0px #C1CFFF;
+  width: 80%;
+  font-size: 20px;
+  font-family: 'Manrope', sans-serif;
+  padding-left: 1rem;
+}
+
+.submit-edit {
+  background-color: #BDCCFF;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  margin-left: 70px;
+  padding: 15px 30px; /* Increase padding */
+  font-size: 18px; /* Larger text */
+  width: 200px; /* Optional: Set a specific width */
+  height: 60px; /* Optional: Set a specific height */
 }

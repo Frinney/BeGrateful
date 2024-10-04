@@ -1,28 +1,51 @@
-<!doctype html>
-<html lang="uk">
-<head>
-    <meta charset="utf-8">
-    <title>Профіль користувача {{ user.login }}</title>
-</head>
-<body>
-    <h1>Профіль користувача {{ user.login }}</h1>
-    <h2>Благодарності:</h2>
-    <ul>
-        {% for gratitude in gratitudes %}
-            <li>
-                <p>{{ gratitude.content }}</p>
-                {% if gratitude.image_url %}
-                    <img src="{{ url_for('static', filename=gratitude.image_url) }}" alt="Gratitude Image">
+{% extends "base.html" %}
+
+{% block title %}Профіль користувача {{ user.login }}{% endblock %}
+
+{% block content %}
+<section class="profile">
+    <div class="profile-header">
+        <h1 class="profile-header-text">Профіль користувача</h1>
+        <div class="profile-header-content">
+            <h2 class="profile-header-name">{{ user.first_name }} {{ user.last_name }}</h2>
+            <p class="profile-header-username">{{ user.login }}</p>
+        </div>
+    </div>
+
+    <div class="profile-user-content">
+        <button class="add-friend">Додати в друзі</button>
+        
+        <button class="edit-profile">Змінити профіль</button>
+
+        <div class="profile-daily-gratitude">
+            <h2 class="daily-gratitude-title">Подяка дня</h2>
+            {% if todays_gratitudes %}
+                <p class="daily-gratitude-description">{{ todays_gratitudes[0].content }}</p>
+                {% if todays_gratitudes[0].image_url %}
+                    <img src="{{ url_for('static', filename=todays_gratitudes[0].image_url) }}" alt="Подяка дня">
                 {% endif %}
-                <p>Дата: {{ gratitude.created_at }}</p>
-            </li>
-        {% else %}
-            <li>Немає жодної благодарності.</li>
-        {% endfor %}
-    </ul>
-    <form method="POST" action="">
-        <button type="submit">Додати в друзі</button>
-    </form>
-    <a href="{{ url_for('index') }}">Назад на головну</a>
-</body>
-</html>
+            {% else %}
+                <p class="daily-gratitude-description">Немає сьогоднішніх подяк.</p>
+            {% endif %}
+        </div>
+
+        <div class="profile-all-gratitudes">
+            <h2>Благодарності:</h2>
+            <ul>
+                {% for gratitude in gratitudes %}
+                    <li>
+                        <p>{{ gratitude.content }}</p>
+                        {% if gratitude.image_url %}
+                            <img src="{{ url_for('static', filename=gratitude.image_url) }}" alt="Gratitude Image">
+                        {% endif %}
+                        <p>Дата: {{ gratitude.created_at }}</p>
+                    </li>
+                {% else %}
+                    <li>Немає жодної благодарності.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+</section>
+{% endblock %}
