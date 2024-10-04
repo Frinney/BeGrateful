@@ -49,6 +49,7 @@ async def index():
     return render_template('index.html', friends=friends_list)
 
 
+
 @app.route('/register', methods=['GET', 'POST'])
 async def register():
     errors = {}
