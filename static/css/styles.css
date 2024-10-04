@@ -315,6 +315,8 @@ li {
 
 
 .global {
+  font-family: 'Manrope', sans-serif;
+
   margin-inline: 22px;
   padding: 35px 35px 100px 35px;
   border-radius: 22px;
@@ -324,6 +326,7 @@ li {
 }
 
 .global_gratitude {
+
   margin-block: 20px;
 }
 .global__gratitude_content {

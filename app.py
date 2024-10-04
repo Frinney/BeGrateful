@@ -46,6 +46,7 @@ def is_valid_name(name):
 def index():
     return render_template('index.html')
 
+
 @app.route('/register', methods=['GET', 'POST'])
 async def register():
     errors = {}

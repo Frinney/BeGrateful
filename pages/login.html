@@ -35,7 +35,7 @@
     </header>
 
     <main class="main">
-        <div class="formReg">
+        <div class="formLog">
             <h1 class="formReg__title">Вхід</h1>
 
             <form action="/login" method="POST">
@@ -45,15 +45,13 @@
                     <input type="text" id="login" name="login" class="{{ 'input-error' if errors.get('login') else 'input-normal' }}" required value="{{ request.form.login }}">
                 </div>
 
-                <div class="classNameAndPass">
                 
-                    <div class="nameAndPass1">
-                        <label for="password">Пароль*</label>
-                        <input type="password" id="password" name="password" class="{{ 'input-error' if errors.get('password') else 'input-normal' }}" required>
-                        {% if errors.get('password') %}
-                            <p class="error-message">{{ errors['password'] }}</p>
-                        {% endif %}
-                    </div>
+                <div class="loginPass">
+                    <label for="password">Пароль*</label>
+                    <input type="password" id="password" name="password" class="{{ 'input-error' if errors.get('password') else 'input-normal' }}" required>
+                    {% if errors.get('password') %}
+                        <p class="error-message">{{ errors['password'] }}</p>
+                    {% endif %}
                 </div>
 
                 <button type="submit">Вхід</button>
