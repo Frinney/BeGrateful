@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     friendsIcon.addEventListener('click', function(event) {
-        event.preventDefault(); 
+        event.preventDefault();
         openModal();
     });
 
@@ -50,7 +50,3 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 194b3b1c5391688d58ead79f355c754eadfb6bb8

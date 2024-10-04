@@ -1,11 +1,9 @@
 <!DOCTYPE html>
 <html lang="uk">
-<<<<<<< HEAD
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/testcalendart.css') }}">
     <title>{% block title %}BeGrateful{% endblock %}</title>
 </head>
 <body>
@@ -34,51 +32,6 @@
                         <img src="{{ url_for('static', filename='icons/calendar-icon.svg') }}" alt="Archive Icon">
                     </a>
                 </li>
-=======
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-        <title>{% block title %}BeGrateful{% endblock %}</title>
-    </head>
-    <body>
-        <header class="header">
-            <nav class="header__navigation">
-                <ul class="header__navigation-group header__navigation-group--left">
-                    <li class="header__navigation-item header__navigation-item--friends">
-                        <a href="#" id="friendsIcon">
-                            <img src="{{ url_for('static', filename='icons/friends-icon.svg') }}" alt="Friends Icon">
-                        </a>
-                    </li>
-                    <li class="header__navigation-item header__navigation-item--global">
-                        <a href="{{ url_for('global_gratitudes') }}">
-                            <img src="{{ url_for('static', filename='icons/global-icon.svg') }}" alt="Global Icon">
-                        </a>
-                    </li>
-                </ul>
-                
-                <a href="{{ url_for('index') }}">
-                    <img src="{{ url_for('static', filename='icons/logo.svg') }}" alt="Logo Icon" class="header__logo">
-                </a>
-                
-                <ul class="header__navigation-group header__navigation-group--right">
-                    <li class="header__navigation-item header__navigation-item--archive">
-                        <img src="{{ url_for('static', filename='icons/calendar-icon.svg') }}" alt="Archive Icon">
-                    </li>
-                    <li class="header__navigation-item header__navigation-item--profile">
-                        <a href="{{ url_for('profile') if session.get('user_id') else url_for('register') }}">
-                            <img src="{{ url_for('static', filename='imagesforcss/profile-image.jpg') }}" class="profile-image" alt="Profile Image">
-                        </a>
-                    </li>
-                    
-                </ul>
-            </nav>
-        </header>
-
-        <div id="friendsModal" class="modal">
-            <div class="modal-content">
-                <span id="closeFriendsModalBtn" class="close">&times;</span>
->>>>>>> 194b3b1c5391688d58ead79f355c754eadfb6bb8
                 
                 <li class="header__navigation-item header__navigation-item--profile">
                     <a href="{{ url_for('profile') if session.get('user_id') else url_for('register') }}">
@@ -89,7 +42,7 @@
         </nav>
     </header>
 
-    <div id="friendsModal" class="modal">
+    <div id="friendsModal" class="modal" style="display: none;">
         <div class="modal-content">
             <span id="closeFriendsModalBtn" class="close">&times;</span>
 
