@@ -2,7 +2,7 @@ import os
 import re
 import asyncio
 
-from flask import Flask, render_template, jsonify, request, redirect, url_for, flash, session
+from flask import Flask, render_template, jsonify, request, redirect, url_for, flash, session, g
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from sqlalchemy.future import select
@@ -11,7 +11,7 @@ from sqlalchemy.orm    import selectinload
 from data.tables       import init_db, BaseEngine, User, Gratitude, Friendship
 from data.queries.user import register_user, get_user_id, add_gratitude, get_gratitudes
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 app = Flask(__name__, template_folder='pages')
@@ -43,8 +43,10 @@ def is_valid_name(name):
     return re.match(r'^[a-zA-Zа-яА-Я]*$', name)
 
 @app.route('/')
-def index():
-    return render_template('index.html')
+async def index():
+    user_id = session.get('user_id')
+    friends_list = await get_friends(user_id) if user_id else []
+    return render_template('index.html', friends=friends_list)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -230,6 +232,36 @@ async def edit_profile():
 
         return render_template('profile.html', user=user, errors=errors)
 
+async def get_friends(user_id):
+    friends_list = []
+    async with BaseEngine.async_session() as db_session:
+        try:
+            result = await db_session.execute(
+                select(Friendship).filter(Friendship.user_id == user_id)
+            )
+            friendships = result.scalars().all()
+
+            for friendship in friendships:
+                friend_result = await db_session.execute(
+                    select(User).filter(User.id == friendship.friend_user_id)
+                )
+                friend = friend_result.scalar_one_or_none()
+                if friend:
+                    friends_list.append(friend)
+        except Exception as e:
+            print(f"Ошибка при загрузке друзей: {e}")
+
+    return friends_list
+
+
+@app.before_request
+async def load_friends():
+    user_id = session.get('user_id')
+    if user_id:
+        g.friends = await get_friends(user_id)
+    else:
+        g.friends = []
+
 
 @app.route('/friends', methods=['GET', 'POST'])
 async def friends():
@@ -238,9 +270,11 @@ async def friends():
         flash('Спершу увійдіть до системи!')
         return redirect(url_for('login_view'))
 
+    friends_list = await get_friends(user_id)
+
     if request.method == 'POST':
         nickname = request.form['nickname'].strip()
-        async with BaseEngine.async_session() as db_session: #edit
+        async with BaseEngine.async_session() as db_session:
             try:
                 result = await db_session.execute(select(User).filter_by(login=nickname))
                 friend = result.scalar_one_or_none()
@@ -255,7 +289,9 @@ async def friends():
             except Exception as e:
                 flash('Виникла помилка при пошуку користувача.')
 
-    return render_template('friends.html')
+    return render_template('friends.html', friends=friends_list)
+
+
 
 @app.route('/profile')
 async def profile():
@@ -264,7 +300,8 @@ async def profile():
         flash('Спершу увійдіть до системи!')
         return redirect(url_for('login_view'))
 
-    today = datetime.utcnow().date() 
+    today = datetime.today()
+
     async with BaseEngine.async_session() as db_session: #edit
         user_result = await db_session.execute(select(User).filter_by(id=user_id))
         user = user_result.scalar_one_or_none()
@@ -355,6 +392,36 @@ async def feed():
         gratitudes = gratitudes.scalars().all()
 
     return render_template('feed.html', gratitudes=gratitudes)
+
+@app.route('/archive')
+async def archive():
+    return render_template('archive.html')
+
+@app.route('/gratitudes/<date>', methods=['GET'])
+async def gratitudes_by_date(date):
+    user_id = session.get('user_id')
+    if not user_id:
+        flash('Спершу увійдіть до системи!')
+        return redirect(url_for('login_view'))
+
+    # Преобразование строки даты в объект datetime
+    try:
+        selected_date = datetime.strptime(date, '%Y-%m-%d').date()
+    except ValueError:
+        flash('Неправильний формат дати! Використовуйте YYYY-MM-DD.')
+        return redirect(url_for('profile'))  # Или любой другой маршрут
+
+    async with BaseEngine.async_session() as db_session:
+        # Получение благодарностей пользователя за выбранную дату
+        gratitude_entries = await db_session.execute(
+            select(Gratitude).filter_by(user_id=user_id).filter(
+                Gratitude.created_at >= selected_date,
+                Gratitude.created_at < selected_date + timedelta(days=1)  # Включая весь день
+            )
+        )
+        todays_gratitudes = gratitude_entries.scalars().all()
+
+    return render_template('gratitudes_by_date.html', gratitudes=todays_gratitudes, selected_date=selected_date)
 
 
 if __name__ == '__main__':

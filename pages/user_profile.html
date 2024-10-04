@@ -13,15 +13,17 @@
     </div>
 
     <div class="profile-user-content">
-        <button class="add-friend">Додати в друзі</button>
 
+    <form method="POST" action="">
+        <button class="add-friend">Додати в друзі</button>
+    </form>
 
         <div class="profile-daily-gratitude">
             <h2 class="daily-gratitude-title">Подяка дня</h2>
             {% if todays_gratitudes %}
                 <p class="daily-gratitude-description">{{ todays_gratitudes[0].content }}</p>
                 {% if todays_gratitudes[0].image_url %}
-                    <img src="{{ url_for('static', filename=todays_gratitudes[0].image_url) }}" alt="Подяка дня">
+                    <img class="gratitude_image" src="{{ url_for('static', filename=todays_gratitudes[0].image_url) }}" alt="Подяка дня">
                 {% endif %}
             {% else %}
                 <p class="daily-gratitude-description">Немає сьогоднішніх подяк.</p>
@@ -35,7 +37,7 @@
                     <li>
                         <p>{{ gratitude.content }}</p>
                         {% if gratitude.image_url %}
-                            <img src="{{ url_for('static', filename=gratitude.image_url) }}" alt="Gratitude Image">
+                            <img class="gratitude_image" src="{{ url_for('static', filename=gratitude.image_url) }}" alt="Gratitude Image">
                         {% endif %}
                         <p>Дата: {{ gratitude.created_at }}</p>
                     </li>

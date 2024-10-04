@@ -57,7 +57,7 @@
             {% if todays_gratitudes %}
                 <p class="daily-gratitude-description">{{ todays_gratitudes[0].content }}</p>
                 {% if todays_gratitudes[0].image_url %}
-                    <img src="{{ url_for('static', filename=todays_gratitudes[0].image_url) }}" alt="Подяка дня" />
+                    <img class="gratitude_image" src="{{ url_for('static', filename=todays_gratitudes[0].image_url) }}" alt="Подяка дня" />
                 {% endif %}
             {% else %}
                 <p class="daily-gratitude-description">Немає сьогоднішніх подяк.</p>

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Архив{% endblock %}
+
+{% block content %}
+<div id="calendar-container">
+    <button id="prev-month">Назад</button>
+    <button id="next-month">Вперед</button>
+    <h2 id="calendar-title"></h2>
+    <div id="calendar"></div>
+</div>
+
+
+<script src="{{ url_for('static', filename='js/calendar.js') }}"></script>
+{% endblock %}

@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
     window.onclick = function(event) {
         if (event.target == modal) {
             modal.style.display = "none";
-            clearPasswordFields(); // Clear password fields
+            clearPasswordFields(); 
         }
     }
 
@@ -49,4 +49,5 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('new_password').value = '';
     }
 });
+
 

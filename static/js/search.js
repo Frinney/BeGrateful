@@ -51,3 +51,20 @@ document.addEventListener('click', function(event) {
         suggestionsContainer.style.display = 'none'; 
     }
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+    const showSearchButton = document.getElementById('showSearch');
+    const showFriendsListButton = document.getElementById('showFriendsList');
+    const searchSection = document.getElementById('searchSection');
+    const friendsListSection = document.getElementById('friendsListSection');
+
+    showSearchButton.addEventListener('click', function() {
+        searchSection.style.display = 'block';
+        friendsListSection.style.display = 'none';
+    });
+
+    showFriendsListButton.addEventListener('click', function() {
+        searchSection.style.display = 'none';
+        friendsListSection.style.display = 'block';
+    });
+});
