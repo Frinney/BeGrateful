@@ -53,6 +53,7 @@ async def index():
 @app.route('/register', methods=['GET', 'POST'])
 async def register():
     errors = {}
+    general_error = None
 
     if request.method == 'POST':
         first_name = request.form.get('first_name', '')  
@@ -81,22 +82,20 @@ async def register():
             errors['confirm_password'] = 'Паролі не співпадають!'
 
         if errors:
-            return render_template('register.html', errors=errors, form=request.form)
+            general_error = 'Некоректні дані. Перевірте їх і повторіть спробу'
+            return render_template('register.html', general_error=general_error, errors=errors, form=request.form)
         
-        print(errors)
-
         is_exist = await register_user(login, password, first_name, last_name, email)
         if is_exist:
-            print("Такий користувач уже існує!")
-            errors['login'] = 'Такий користувач уже існує!'
-
-            return render_template('register.html', errors=errors, form=request.form)
-        print("Такий користувач уже існує!")
+            general_error = 'Некоректні дані. Перевірте їх і повторіть спробу'
+            return render_template('register.html', general_error=general_error, errors=errors, form=request.form)
 
         flash('Реєстрація пройшла успішно!')
         return redirect(url_for('index'))
 
-    return render_template('register.html', errors=errors)
+    return render_template('register.html', errors=errors, form=request.form)
+
+
 
 @app.route('/login', methods=['GET', 'POST'])
 async def login_view():
@@ -378,13 +377,11 @@ async def feed():
         return redirect(url_for('login_view'))
 
     async with BaseEngine.async_session() as db_session: #edit
-        # Fetch friends' IDs
         friendships = await db_session.execute(
             select(Friendship).filter_by(user_id=user_id)
         )
         friend_ids = [friendship.friend_user_id for friendship in friendships.scalars().all()]
 
-        # Fetch gratitudes from friends
         gratitudes = await db_session.execute(
             select(Gratitude).filter(Gratitude.user_id.in_(friend_ids)).filter(Gratitude.is_public == True)
             .options(selectinload(Gratitude.user))
@@ -405,19 +402,18 @@ async def gratitudes_by_date(date):
         flash('Спершу увійдіть до системи!')
         return redirect(url_for('login_view'))
 
-    # Преобразование строки даты в объект datetime
     try:
         selected_date = datetime.strptime(date, '%Y-%m-%d').date()
     except ValueError:
         flash('Неправильний формат дати! Використовуйте YYYY-MM-DD.')
-        return redirect(url_for('profile'))  # Или любой другой маршрут
+        return redirect(url_for('profile'))
 
     async with BaseEngine.async_session() as db_session:
-        # Получение благодарностей пользователя за выбранную дату
+
         gratitude_entries = await db_session.execute(
             select(Gratitude).filter_by(user_id=user_id).filter(
                 Gratitude.created_at >= selected_date,
-                Gratitude.created_at < selected_date + timedelta(days=1)  # Включая весь день
+                Gratitude.created_at < selected_date + timedelta(days=1) 
             )
         )
         todays_gratitudes = gratitude_entries.scalars().all()

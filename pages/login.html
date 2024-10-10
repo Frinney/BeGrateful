@@ -31,7 +31,6 @@
                     <label for="login">Логін*</label>
                     <input type="text" id="login" name="login" class="{{ 'input-error' if errors.get('login') else 'input-normal' }}" required value="{{ request.form.login }}">
                 </div>
-
                 
                 <div class="loginPass">
                     <label for="password">Пароль*</label>
@@ -40,7 +39,7 @@
                         <p class="error-message">{{ errors['password'] }}</p>
                     {% endif %}
                 </div>
-
+                
                 <button type="submit">Вхід</button>
 
                 {% with messages = get_flashed_messages() %}

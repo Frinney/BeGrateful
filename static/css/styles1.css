@@ -122,14 +122,34 @@ label {
     font-family: 'Manrope', sans-serif;
 }
 
-input[type="text"], input[type="email"], input[type="password"] {
+input[type="text"].input-error,
+input[type="email"].input-error,
+input[type="password"].input-error {
+    border: 1px solid red;
+    box-shadow: 5px 6px 0px #ec0000;
+}
+
+input[type="text"].input-normal,
+input[type="email"].input-normal,
+input[type="password"].input-normal {
     border: 0px solid #ccc;
+    box-shadow: 5px 6px 0px #C1CFFF;
+}
+
+.error-message {
+    color: red; 
+    font-size: 14px; 
+    margin-top: 5px; 
+}
+
+
+
+input[type="text"], input[type="email"], input[type="password"] {
     border-radius: 0px;
     box-sizing: border-box;
     background-color: #EFF3FF;
     height: 56px;
     border-radius: 14px;
-    box-shadow: 5px 6px 0px #C1CFFF;
     width: 100%;
     font-size: 20px;
     font-family: 'Manrope', sans-serif;
@@ -268,3 +288,17 @@ button[type="submit"]{
 }
 
 
+
+.flash-messages {
+    width: 951px; /* Установите ширину по вашему желанию */
+    height: 30px; /* Установите высоту по вашему желанию */
+    font-family: 'Manrope', sans-serif; /* Убедитесь, что шрифт подключен */
+    font-style: normal;
+    font-weight: 400;
+    font-size: 22px;
+    line-height: 30px; /* Идентичен высоте блока */
+    text-align: center; /* Центрирование текста */
+    color: #FF0000; /* Красный цвет текста */
+    display: flex; /* Используем flexbox для центрирования */
+    justify-content: center; /* Центрируем содержимое */
+}

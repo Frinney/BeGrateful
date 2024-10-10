@@ -5,15 +5,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles1.css') }}">
+    <script src="/static/js/app.js"></script>
+
     <title>BeGrateful</title>
+
 </head>
 
 <body>
     <header class="header">
         <nav class="header__navigation">
-
             <img src="{{ url_for('static', filename='icons/logo.svg') }}" alt="Logo Icon" class="header__logo">
-
         </nav>
     </header>
 
@@ -25,88 +26,64 @@
 
                 <div class="classNameAndPass">
                     <div class="nameAndPass1">
-                        <label for="first_name">Ім'я</label>
+                        <label for="first_name" class="{{ 'error-label' if errors.get('first_name') else '' }}">Ім'я</label>
                         <input type="text" id="first_name" name="first_name" class="{{ 'input-error' if errors.get('first_name') else 'input-normal' }}" value="{{ request.form.first_name }}">
                     </div>
 
                     <div class="nameAndPass2">
-                        <label for="last_name">Прізвище</label>
+                        <label for="last_name" class="{{ 'error-label' if errors.get('last_name') else '' }}">Прізвище</label>
                         <input type="text" id="last_name" name="last_name" class="{{ 'input-error' if errors.get('last_name') else 'input-normal' }}" value="{{ request.form.last_name }}">
                     </div>
                 </div>
 
                 <div class="logAndMail">
-                    <label for="login">Логін*</label>
+                    <label for="login" class="{{ 'error-label' if errors.get('login') else '' }}">Логін*</label>
                     <input type="text" id="login" name="login" class="{{ 'input-error' if errors.get('login') else 'input-normal' }}" required value="{{ request.form.login }}">
                 </div>
 
                 <div class="logAndMail">
-                    <label for="email">Пошта*</label>
+                    <label for="email" class="{{ 'error-label' if errors.get('email') else '' }}">Пошта*</label>
                     <input type="email" id="email" name="email" class="{{ 'input-error' if errors.get('email') else 'input-normal' }}" required value="{{ request.form.email }}">
                 </div>
 
                 <div class="classNameAndPass">
                     <div class="nameAndPass1">
-                        <label for="password">Пароль*</label>
+                        <label for="password" class="{{ 'error-label' if errors.get('password') else '' }}">Пароль*</label>
                         <div class="password-wrapper">
                             <input type="password" id="password" name="password" class="{{ 'input-error' if errors.get('password') else 'input-normal' }}" required>
-                            <span class="toggle-password" onclick="togglePassword('password', this)"><svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-                                <rect width="36" height="36" rx="12" fill="#9BB2FF"/>
-                                <rect x="2" y="2" width="32" height="32" fill="url(#pattern0_315_78)"/>
-                                <defs>
-                                <pattern id="pattern0_315_78" patternContentUnits="objectBoundingBox" width="1" height="1">
-                                <use xlink:href="#image0_315_78" transform="scale(0.01)"/>
-                                </pattern>
-                                <image id="image0_315_78" width="100" height="100" xlink:href="data:image/png;base64,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"/>
-                                </defs>
-                                </svg></span>
+                            <span class="toggle-password" onclick="togglePassword('password', this)">
+                                <!-- SVG for the eye icon -->
+                            </span>
                         </div>
                     </div>
-                
+
                     <div class="nameAndPass2">
-                        <label for="confirm_password">Підтвердіть пароль*</label>
+                        <label for="confirm_password" class="{{ 'error-label' if errors.get('confirm_password') else '' }}">Підтвердіть пароль*</label>
                         <div class="password-wrapper">
                             <input type="password" id="confirm_password" name="confirm_password" class="{{ 'input-error' if errors.get('confirm_password') else 'input-normal' }}" required>
-                            <span class="toggle-password" onclick="togglePassword('confirm_password', this)"><svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-                                <rect width="36" height="36" rx="12" fill="#9BB2FF"/>
-                                <rect x="2" y="2" width="32" height="32" fill="url(#pattern0_315_78)"/>
-                                <defs>
-                                <pattern id="pattern0_315_78" patternContentUnits="objectBoundingBox" width="1" height="1">
-                                <use xlink:href="#image0_315_78" transform="scale(0.01)"/>
-                                </pattern>
-                                <image id="image0_315_78" width="100" height="100" xlink:href="data:image/png;base64,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"/>
-                                </defs>
-                                </svg></span>
+                            <span class="toggle-password" onclick="togglePassword('confirm_password', this)">
+                                <!-- SVG for the eye icon -->
+                            </span>
                         </div>
                     </div>
                 </div>
 
                 <button type="submit">Реєстрація</button>
 
-                {% with messages = get_flashed_messages() %}
-                {% if messages %}
-                <ul class="flash-messages">
-                    {% for message in messages %}
-                    <li>{{ message }}</li>
-                    {% endfor %}
-                </ul>
-                {% endif %}
-                {% endwith %}
             </form>
+            
+            {% if general_error %}
+            <p class="error-message">{{ general_error }}</p>
+            {% endif %}
+            
         </div>
+
     </main>
 
     <footer class="footer">
         <div id="footer"></div>
     </footer>
 
-    <script>
-        function togglePassword(fieldId) {
-            const passwordField = document.getElementById(fieldId);
-            const type = passwordField.type === 'password' ? 'text' : 'password';
-            passwordField.type = type;
-        }
-    </script>
 </body>
 
 </html>
