@@ -15,12 +15,18 @@
     <header class="header">
         <nav class="header__navigation">
             <img src="{{ url_for('static', filename='icons/logo.svg') }}" alt="Logo Icon" class="header__logo">
+            
+           
         </nav>
     </header>
+    
 
     <main class="main">
         <div class="formReg">
-            <h1 class="formReg__title">Реєстрація</h1>
+            <ul class="header__links">
+                <li><a href="{{ url_for('register') }}" class="{{ 'active' if request.path == '/register' else '' }}">Реєстрація</a></li>
+                <li><a href="{{ url_for('login_view') }}" class="{{ 'active' if request.path == '/login' else '' }}">Вхід</a></li>
+            </ul>
 
             <form action="/register" method="POST">
 

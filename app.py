@@ -90,16 +90,15 @@ async def register():
             general_error = 'Некоректні дані. Перевірте їх і повторіть спробу'
             return render_template('register.html', general_error=general_error, errors=errors, form=request.form)
 
-        flash('Реєстрація пройшла успішно!')
         return redirect(url_for('index'))
 
     return render_template('register.html', errors=errors, form=request.form)
 
 
-
 @app.route('/login', methods=['GET', 'POST'])
 async def login_view():
     errors = {}
+    invalid_credentials = False 
 
     if request.method == 'POST':
         login = request.form.get('login')
@@ -115,21 +114,27 @@ async def login_view():
 
             if user_id is not None:
                 session['user_id'] = user_id
-                flash('Ви успішно увійшли в систему!')
+
                 return redirect(url_for('index'))
            
+            invalid_credentials = True  
             flash('Неправильний логін або пароль!')
             return redirect(url_for('login_view'))
 
-    return render_template('login.html', errors=errors)
+    return render_template('login.html', errors=errors, invalid_credentials=invalid_credentials)
 
 
 @app.route('/create', methods=['GET', 'POST'])
 async def create_gratitude():
+
+    user_id = session.get('user_id')
+    if not user_id:
+        flash('Спершу увійдіть до системи!', 'warning')  
+        return redirect(url_for('login_view'))  
+
     if request.method == 'POST':
         content = request.form.get('content')
         image = request.files.get('image')
-        user_id = session.get('user_id')
         is_public = request.form.get('is_public') is not None 
         image_url = None
 
@@ -152,6 +157,7 @@ async def create_gratitude():
         return redirect(url_for('index'))
 
     return render_template('index.html')  
+
 
 @app.route('/global')
 async def global_gratitudes():

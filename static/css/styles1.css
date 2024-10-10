@@ -93,24 +93,6 @@ form {
 }
 
 
-h1[class='formReg__title'] {
-    font-family: 'Manrope', sans-serif;
-    margin-left: auto;
-    margin-right: auto;
-    width: 6em;
-    font-size: 40px;
-    font-weight: 500;
-    line-height: 54.64px;
-    text-align: center;
-}
-
-.formReg__title {
-    text-align: center;
-    margin: 0;
-}
-
-
-
 .header__logo {
     max-width: 100%;
     height: auto;
@@ -262,7 +244,7 @@ button[type="submit"]{
 }
 
 .input-normal {
-    padding-right: 30px; /* чтобы иконка не перекрывала текст */
+    padding-right: 30px;
 }
 
 .input-error {
@@ -290,15 +272,55 @@ button[type="submit"]{
 
 
 .flash-messages {
-    width: 951px; /* Установите ширину по вашему желанию */
-    height: 30px; /* Установите высоту по вашему желанию */
-    font-family: 'Manrope', sans-serif; /* Убедитесь, что шрифт подключен */
+    width: 951px; 
+    height: 30px;
+    font-family: 'Manrope', sans-serif; 
     font-style: normal;
     font-weight: 400;
     font-size: 22px;
-    line-height: 30px; /* Идентичен высоте блока */
-    text-align: center; /* Центрирование текста */
-    color: #FF0000; /* Красный цвет текста */
-    display: flex; /* Используем flexbox для центрирования */
-    justify-content: center; /* Центрируем содержимое */
+    line-height: 30px; 
+    text-align: center; 
+    color: #FF0000; 
+    display: flex;
+    justify-content: center;
+}
+
+
+.header {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.header__navigation {
+    display: flex;
+    justify-content: center;
+    width: 100%; /* Чтобы навигация занимала всю ширину */
+}
+
+.header__links {
+    list-style-type: none;
+    display: flex;
+    gap: 20px;
+    padding: 0;
+    margin: 0;
+    justify-content: center;
+    width: 100%; /* Центрируем сами ссылки */
+    text-align: center;
+}
+
+.header__links a {
+    font-family: 'Manrope', sans-serif;
+    text-decoration: none;
+    color: #000000;
+    font-size: 40px;
+    font-weight: 500;
+    line-height: 54.64px;
+    width: 6em;
+}
+
+.header__links a.active {
+    font-weight: bold;
+    color: #000000;
+    border-bottom: 2px solid #000000;
 }
