@@ -42,48 +42,56 @@
         </nav>
     </header>
 
+    
+
     <div id="friendsModal" class="modal" style="display: none;">
         <div class="modal-content">
             <span id="closeFriendsModalBtn" class="close">&times;</span>
-
-            <h1 class="h1_find_friends">Пошук друзів</h1>
-
-            <div class="toggle-buttons">
-                <button class="toggle-button" id="showSearch">Пошук друзів</button>
-                <button class="toggle-button" id="showFriendsList">Список друзів</button>
+    
+            <div class="friends-search" style="position: relative;">
+                <img src="{{ url_for('static', filename='icons/search-icon.svg') }}" alt="" class="friends-searach__icon">
+                <input type="text" class="friends-search__input" id="nickname" name="nickname" placeholder="Знайдіть друзів за імям або id" required autocomplete="off">
+                <div id="suggestions" class="suggestions"></div>
             </div>
-
-            <div id="searchSection" class="modal-section">
-                <form method="POST" action="{{ url_for('friends') }}">
-                    <input type="text" class="input_modal" id="nickname" name="nickname" placeholder="Нікнейм" required autocomplete="off">
-                    <div id="suggestions" class="suggestions"></div>
-                </form>
-
-                {% with messages = get_flashed_messages() %}
-                    {% if messages %}
-                        <ul class="flashes">
-                            {% for message in messages %}
-                                <li>{{ message }}</li>
-                            {% endfor %}
-                        </ul>
-                    {% endif %}
-                {% endwith %}
+    
+            <hr>
+            
+            <div class="friends-list">
+                <h1 class="friends-list__number">Мої друзі ({{ g.friends|length }})</h1>
+                <div class="friends-wrapper">
+                {% for friend in g.friends %}
+                    <div class="friends-list__friend">
+                        <a href="{{ url_for('user_profile', user_id=friend.id) }}">
+                            <img src="{{ url_for('static', filename='imagesforcss/profile-image.jpg') }}" alt="" class="friend_img">
+                        </a>
+                        <div class="friend_title">
+                            <h2 class="name">
+                                <a href="{{ url_for('user_profile', user_id=friend.id) }}" style="color: black; text-decoration: none;">
+                                    {{ friend.login }}
+                                </a>
+                            </h2>
+                            <h2 class="username">{{ friend.username }}</h2>
+                        </div>
+                        <button class="delete-friend">
+                            <img src="{{ url_for('static', filename='icons/close-icon.svg') }}" alt="">
+                        </button>
+                    </div>
+                {% endfor %}
             </div>
-
-            <div id="friendsListSection" class="modal-section" style="display: none;">
-                <ul>
-                    {% for friend in g.friends %}
-                        <li>
-                            <a href="{{ url_for('user_profile', user_id=friend.id) }}">
-                                {{ friend.login }}
-                            </a>
-                        </li>
-                    {% endfor %}
-                </ul>
             </div>
+    
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <ul class="flashes">
+                        {% for message in messages %}
+                            <li>{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
         </div>
     </div>
-
+    
     <main>
         {% block content %}{% endblock %}
     </main>

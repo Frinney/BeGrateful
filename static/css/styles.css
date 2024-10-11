@@ -8,6 +8,7 @@ li {
   cursor: pointer;
 }
 
+
 @font-face {
   font-family: 'Manrope';
   src: url('../fonts/Manrope-Thin.woff2');
@@ -249,14 +250,7 @@ li {
   background-color: rgba(0, 0, 0, 0.5);
 }
 
-.modal-content {
-  background-color: #fff;
-  margin: 15% auto;
-  padding: 20px;
-  border: 1px solid #888;
-  width: 30%;
-  border-radius: 15px;
-}
+
 
 .input_modal {
   border: 0px solid #ccc;
@@ -585,6 +579,10 @@ li {
   cursor: pointer; 
 }
 
+#calendar-title{
+  font-family: 'Manrope', sans-serif;
+}
+
 #calendar div:hover {
   background-color: #e0f7fa; 
 }
@@ -593,17 +591,22 @@ li {
   background-color: #b2ebf2; 
 }
 
+.flashes{
+  font-family: 'Manrope', sans-serif;
+}
+
 #prev-month, #next-month {
-  font-family: 'Manrope';
+  font-family: 'Manrope', sans-serif;
   font-weight: 800;
   background-color: #BDCCFF;
   border: none;
-  padding: 12px 25px;
+  padding: 20px;
   color: white;
   font-size: 24px;
   border-radius: 14px;
   cursor: pointer;
   transition: all 0.3s;
+  height: 78px;
   text-transform: uppercase;
 }
 
@@ -614,4 +617,73 @@ li {
 h2 {
   margin: 10px 0;
   font-size: 24px;
+}
+
+
+
+
+
+.modal-content {
+  background-color: #fff;
+  margin: 15% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 70%;
+  border-radius:28px;
+}
+
+
+.friends-search {
+  display: flex;
+}
+.friends-searach__icon {
+}
+.friends-search__input {
+  font-family: 'Manrope', sans-serif;
+  font-weight: 200;
+  border: none;
+  width: 600px;
+  font-size: 20px;
+  border-radius: 12px;
+}
+
+.friends-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: 'Manrope', sans-serif;
+}
+.friends-list__number {
+}
+.friends-list__friend {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 30px;
+}
+.friend_img {
+  width: 80px;
+  height: 80px;
+  border-radius:100%;
+}
+.friend_title {
+  font-weight: 300;
+  display: flex;
+  margin-left: 20px;
+  flex-direction: column;
+}
+.friend_title .name {
+  margin-bottom: 0px;
+  margin-bottom: 0px;
+}
+.friend_title .username {
+  margin-bottom: 0px;
+  margin-top: 0px;
+  color: #858585;
+}
+.delete-friend {
+  background-color: transparent;
+  border: 0;
+  margin-left: 80px;
+
 }

@@ -4,10 +4,12 @@
 
 {% block content %}
 <div id="calendar-container">
-    <button id="prev-month">Назад</button>
-    <button id="next-month">Вперед</button>
+    
     <h2 id="calendar-title"></h2>
+    <button id="prev-month"><img src="{{ url_for('static', filename='icons/arrow-icon.svg') }}" alt=""></button>
+    <button id="next-month"><img src="{{ url_for('static', filename='icons/arrow-icon.svg') }}" alt="" style="transform: rotate(180deg);"></button>
     <div id="calendar"></div>
+    
 </div>
 
 
