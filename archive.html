@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Архив{% endblock %}
+
+{% block content %}
+<div id="toggle-container">
+    <button id="toggle-view">Переключить на список благодарностей</button>
+</div>
+
+<div id="calendar-container">
+    <h2 id="calendar-title"></h2>
+    <button id="prev-month"><img src="{{ url_for('static', filename='icons/arrow-icon.svg') }}" alt=""></button>
+    <button id="next-month"><img src="{{ url_for('static', filename='icons/arrow-icon.svg') }}" alt="" style="transform: rotate(180deg);"></button>
+    <div id="calendar"></div>
+</div>
+
+<div id="gratitude-list-container" style="display: none;">
+    <h2 class="globel-title">Список благодарностей</h2>
+    {% if user_gratitudes %}
+        <ul id="gratitude-list">  
+        {% for gratitude in user_gratitudes %}
+            <li id="gratitude-{{ gratitude.id }}" class="global_gratitude" data-id="{{ gratitude.id }}">
+                <div class="global__gratitude_content">
+                    <img src="{{ url_for('static', filename='imagesforcss/profile-image.jpg') }}" alt="" class="profile-image">
+                    <div class="global__gratitude_text">
+                        <h3 class="global__gratitude_title">{{ gratitude.user.login if gratitude.user else 'Невідомий' }}</h3>
+                        <p class="global__gratitude_description">{{ gratitude.content }}</p>
+                        {% if gratitude.image_url %}
+                        <img src="{{ url_for('static', filename=gratitude.image_url) }}" class="gratitude_image" alt="Gratitude Image">
+                        {% endif %}
+                    </div>
+                    <button class="delete-gratitude" data-id="{{ gratitude.id }}">Удалить</button>
+                </div>
+            </li>
+        {% endfor %}
+        </ul>  
+    {% else %}
+        <p>Нет благодарностей.</p>
+    {% endif %}
+</div>
+
+
+<script src="{{ url_for('static', filename='js/calendar.js') }}"></script>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+$(document).on('click', '.delete-gratitude', function(e) {
+    e.preventDefault();
+    
+    const gratitudeId = $(this).data('id'); 
+    
+    if (confirm('Вы уверены, что хотите удалить эту благодарность?')) {
+        $.ajax({
+            type: 'POST',
+            url: `/delete_gratitude/${gratitudeId}`,
+            success: function(response) {
+                if (response.success) {
+
+                    $(`#gratitude-${gratitudeId}`).remove();
+                    alert('Благодарность успешно удалена!');
+                } else {
+                    alert('Произошла ошибка при удалении благодарности.');
+                }
+            },
+            error: function() {
+                alert('Произошла ошибка при удалении благодарности.');
+            }
+        });
+    }
+});
+</script>
+
+{% endblock %}

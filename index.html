@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Профіль{% endblock %}
+
+{% block content %}
+    <div class="gratitude">
+      <h2 class="gratitude__title">За що ви вдячні сьогодні?</h2>
+      <form method="POST" action="{{ url_for('create_gratitude') }}" enctype="multipart/form-data">
+        <div class="gratitude__content">
+          <div class="gratitude__input-wrapper">
+            <label for="gratitude-input" class="gratitude__file-label">
+              <img src="{{ url_for('static', filename='icons/screpka-icon.svg') }}" alt="" />
+            </label>
+            <textarea id="gratitude-input" name="content" class="gratitude__textarea" rows="2"
+              placeholder="Напишіть, за що ви вдячні сьогодні..." required></textarea>
+          </div>
+          <input type="file" id="gratitude__input" name="image" multiple accept="image/*" style="display: none;">
+          <div class="gratitude__images" id="gratitude__images-preview"></div>
+        </div>
+        <div class="gratitude__footer">
+          <button type="submit" class="gratitude__save-btn">Зберегти</button>
+          <div class="gratitude__public-option">
+            <input type="checkbox" id="public" class="gratitude__checkbox" name="is_public">
+            <label for="public" class="gratitude__public-label">Зробити вдячність публічною*</label>
+            
+          </div>
+        </div>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="flash-messages">
+              {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+      
+      </form>
+    </div>
+{% endblock %}

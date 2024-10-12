@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <title>{% block title %}BeGrateful{% endblock %}</title>
+</head>
+<body>
+    <header class="header">
+        <nav class="header__navigation">
+            <ul class="header__navigation-group header__navigation-group--left">
+                <li class="header__navigation-item header__navigation-item--friends">
+                    <a href="#" id="friendsIcon">
+                        <img src="{{ url_for('static', filename='icons/friends-icon.svg') }}" alt="Friends Icon">
+                    </a>
+                </li>
+                <li class="header__navigation-item header__navigation-item--global">
+                    <a href="{{ url_for('global_gratitudes') }}">
+                        <img src="{{ url_for('static', filename='icons/global-icon.svg') }}" alt="Global Icon">
+                    </a>
+                </li>
+            </ul>
+
+            <a href="{{ url_for('index') }}">
+                <img src="{{ url_for('static', filename='icons/logo.svg') }}" alt="Logo Icon" class="header__logo">
+            </a>
+
+            <ul class="header__navigation-group header__navigation-group--right">
+                <li class="header__navigation-item header__navigation-item--archive">
+                    <a href="{{ url_for('archive') }}">
+                        <img src="{{ url_for('static', filename='icons/calendar-icon.svg') }}" alt="Archive Icon">
+                    </a>
+                </li>
+                
+                <li class="header__navigation-item header__navigation-item--profile">
+                    <a href="{{ url_for('profile') if session.get('user_id') else url_for('register') }}">
+                        <img src="{{ url_for('static', filename='imagesforcss/profile-image.jpg') }}" class="profile-image" alt="Profile Image">
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    
+
+    <div id="friendsModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span id="closeFriendsModalBtn" class="close">&times;</span>
+    
+            <div class="friends-search" style="position: relative;">
+                <img src="{{ url_for('static', filename='icons/search-icon.svg') }}" alt="" class="friends-searach__icon">
+                <input type="text" class="friends-search__input" id="nickname" name="nickname" placeholder="Знайдіть друзів за імям або id" required autocomplete="off">
+                <div id="suggestions" class="suggestions"></div>
+            </div>
+    
+            <hr>
+            
+            <div class="friends-list">
+                <h1 class="friends-list__number">Мої друзі ({{ g.friends|length }})</h1>
+                <div class="friends-wrapper">
+                {% for friend in g.friends %}
+                    <div class="friends-list__friend">
+                        <a href="{{ url_for('user_profile', user_id=friend.id) }}">
+                            <img src="{{ url_for('static', filename='imagesforcss/profile-image.jpg') }}" alt="" class="friend_img">
+                        </a>
+                        <div class="friend_title">
+                            <h2 class="name">
+                                <a href="{{ url_for('user_profile', user_id=friend.id) }}" style="color: black; text-decoration: none;">
+                                    {{ friend.login }}
+                                </a>
+                            </h2>
+                            <h2 class="username">{{ friend.username }}</h2>
+                        </div>
+
+                        <button class="delete-friend" data-friend-id="{{ friend.id }}">
+                            <img src="{{ url_for('static', filename='icons/close-icon.svg') }}" alt="">
+                        </button>
+                        
+                    </div>
+                {% endfor %}
+            </div>
+            </div>
+    
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <ul class="flashes">
+                        {% for message in messages %}
+                            <li>{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+        </div>
+    </div>
+    
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/gratitude.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/search.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/deletefriend.js') }}"></script>
+
+</body>
+</html>

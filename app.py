@@ -159,9 +159,9 @@ async def create_gratitude():
     return render_template('index.html')  
 
 
-@app.route('/global')
+@app.route('/global_gratitudes')
 async def global_gratitudes():
-    gratitudes = await get_gratitudes()
+    gratitudes = await get_gratitudes()  # This function should return all global gratitudes
 
     return render_template('global.html', gratitudes=gratitudes)
 
@@ -399,7 +399,19 @@ async def feed():
 
 @app.route('/archive')
 async def archive():
-    return render_template('archive.html')
+    user_id = session.get('user_id')
+    if not user_id:
+        flash('Спершу увійдіть до системи!')
+        return redirect(url_for('login_view'))
+
+    async with BaseEngine.async_session() as db_session:
+
+        gratitude_entries = await db_session.execute(
+            select(Gratitude).options(selectinload(Gratitude.user)).filter_by(user_id=user_id).order_by(Gratitude.created_at.desc())
+        )
+        all_gratitudes = gratitude_entries.scalars().all()
+
+    return render_template('archive.html', user_gratitudes=all_gratitudes)
 
 @app.route('/gratitudes/<date>', methods=['GET'])
 async def gratitudes_by_date(date):
@@ -425,6 +437,74 @@ async def gratitudes_by_date(date):
         todays_gratitudes = gratitude_entries.scalars().all()
 
     return render_template('gratitudes_by_date.html', gratitudes=todays_gratitudes, selected_date=selected_date)
+
+@app.route('/delete_friend/<int:friend_id>', methods=['POST'])
+async def delete_friend(friend_id):
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'User not logged in'}), 403
+
+    async with BaseEngine.async_session() as db_session:
+        friendship = await db_session.execute(
+            select(Friendship).filter_by(user_id=user_id, friend_user_id=friend_id)
+        )
+        friendship = friendship.scalar_one_or_none()
+
+        if friendship:
+            await db_session.delete(friendship)
+            await db_session.commit()
+            return jsonify({'success': True}), 200
+
+        return jsonify({'error': 'Friend not found'}), 404
+    
+
+@app.route('/logout', methods=['POST'])
+def logout():
+    session.pop('user_id', None)
+    flash('Ви успішно вийшли з акаунту!', 'info')
+    return redirect(url_for('login_view'))
+
+@app.route('/delete_gratitude/<int:gratitude_id>', methods=['POST'])
+async def delete_gratitude(gratitude_id):
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'User not logged in'}), 403
+
+    async with BaseEngine.async_session() as db_session:
+        gratitude = await db_session.execute(
+            select(Gratitude).filter_by(id=gratitude_id, user_id=user_id)
+        )
+        gratitude = gratitude.scalar_one_or_none()
+
+        if gratitude:
+            await db_session.delete(gratitude)
+            await db_session.commit()
+            return jsonify({'success': True}), 200
+
+        return jsonify({'error': 'Gratitude not found'}), 404
+
+@app.route('/friends_gratitudes')
+async def friends_gratitudes():
+    user_id = session.get('user_id')
+    if not user_id:
+        flash('Спершу увійдіть до системи!')
+        return redirect(url_for('login_view'))
+
+    async with BaseEngine.async_session() as db_session:
+        friendships = await db_session.execute(
+            select(Friendship).filter_by(user_id=user_id)
+        )
+        friend_ids = [friendship.friend_user_id for friendship in friendships.scalars().all()]
+
+        # Fetch gratitudes from friends
+        gratitudes = await db_session.execute(
+            select(Gratitude).filter(Gratitude.user_id.in_(friend_ids)).filter(Gratitude.is_public == True)
+            .options(selectinload(Gratitude.user))
+            .order_by(Gratitude.created_at.desc())
+        )
+        gratitudes = gratitudes.scalars().all()
+
+    return render_template('global.html', gratitudes=gratitudes)
 
 
 if __name__ == '__main__':
