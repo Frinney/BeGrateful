@@ -2,3 +2,4 @@ venv
 .env
 postgres-data
 __pycache__/
+*.db
