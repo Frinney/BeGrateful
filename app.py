@@ -10,10 +10,11 @@ from flask import render_template, jsonify, request, redirect, url_for, flash, s
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
+from sqlalchemy.orm    import selectinload
 from sqlalchemy.future import select
 
 
-from data.tables       import BaseEngine, User, Friendship
+from data.tables       import BaseEngine, User, Friendship, Gratitude
 from data.queries.user import (
     register_user, get_user_id, add_gratitude, 
     get_gratitudes, get_todays_gratitudes, get_gratitudes_by_method, 
@@ -471,8 +472,3 @@ async def friends_gratitudes():
         gratitudes = gratitudes.scalars().all()
 
     return render_template('global.html', gratitudes=gratitudes)
-
-
-if __name__ == '__main__':
-    asyncio.run(init_db())
-    app.run(debug = True)
