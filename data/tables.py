@@ -6,11 +6,14 @@ from sqlalchemy.sql.sqltypes import TIMESTAMP, Integer, TEXT, BOOLEAN
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker, create_async_engine
 
 
-DATABASE_URL = "sqlite+aiosqlite:///database.db"
+from config import settings
+
+
+#DATABASE_URL = "sqlite+aiosqlite:///database.db"
 
 
 class BaseEngine:
-    async_engine:  AsyncEngine = create_async_engine(DATABASE_URL, echo = True)
+    async_engine:  AsyncEngine = create_async_engine(settings.get_postegres_url, echo = True)
     async_session: async_sessionmaker[AsyncSession] = async_sessionmaker(async_engine, expire_on_commit = False)
 
 

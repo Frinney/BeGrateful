@@ -1,0 +1,4 @@
+venv
+.env
+postgres-data
+__pycache__/

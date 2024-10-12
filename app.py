@@ -1,21 +1,33 @@
 import os
 import re
-import asyncio
 
-from flask import Flask, render_template, jsonify, request, redirect, url_for, flash, session, g
+
+from flask import Flask
+from asgiref.wsgi import WsgiToAsgi
+from werkzeug.middleware.proxy_fix import ProxyFix
+
+from flask import render_template, jsonify, request, redirect, url_for, flash, session, g
 from werkzeug.security import generate_password_hash, check_password_hash
 
+
 from sqlalchemy.future import select
-from sqlalchemy.orm    import selectinload
 
-from data.tables       import init_db, BaseEngine, User, Gratitude, Friendship
-from data.queries.user import register_user, get_user_id, add_gratitude, get_gratitudes
 
-from datetime import datetime, timedelta
+from data.tables       import BaseEngine, User, Friendship
+from data.queries.user import (
+    register_user, get_user_id, add_gratitude, 
+    get_gratitudes, get_todays_gratitudes, get_gratitudes_by_method, 
+    get_search_users, get_gratitudes_by_user_id, get_todays_gratitudes_by_user_id
+)
+
+from datetime import datetime
 
 
 app = Flask(__name__, template_folder='pages')
 app.secret_key = 'your_secret_key'
+
+app.wsgi_app = ProxyFix(app.wsgi_app)
+asgi_app = WsgiToAsgi(app)
 
  
 def is_valid_email(email):
@@ -306,20 +318,12 @@ async def profile():
         flash('Спершу увійдіть до системи!')
         return redirect(url_for('login_view'))
 
-    today = datetime.today()
+    data = await get_todays_gratitudes(user_id)
+    if data is None:
+        flash('Користувача не знайдено!')
+        return redirect(url_for('index'))
 
-    async with BaseEngine.async_session() as db_session: #edit
-        user_result = await db_session.execute(select(User).filter_by(id=user_id))
-        user = user_result.scalar_one_or_none()
-
-        if user is None:
-            flash('Користувача не знайдено!')
-            return redirect(url_for('index'))
-
-        gratitude_entries = await db_session.execute(
-            select(Gratitude).filter_by(user_id=user_id).filter(Gratitude.created_at >= today)
-        )
-        todays_gratitudes = gratitude_entries.scalars().all()
+    todays_gratitudes, user = data
 
     return render_template('profile.html', user=user, todays_gratitudes=todays_gratitudes)
 
@@ -331,49 +335,30 @@ async def user_profile(user_id):
     if not current_user_id:
         flash('Спершу увійдіть до системи!')
         return redirect(url_for('login_view'))
-
-    async with BaseEngine.async_session() as db_session: #edit
-        user = await db_session.execute(select(User).filter_by(id=user_id))
-        user = user.scalar_one_or_none()
-
-        if user is None:
-            flash('Користувача не знайдено!')
-            return redirect(url_for('feed')) 
-
-        if request.method == 'POST':
-
-            if current_user_id == user.id:
-                flash('Ви не можете додати себе в друзі!')
-            else:
-                existing_friendship = await db_session.execute(
-                    select(Friendship).filter_by(user_id=current_user_id, friend_user_id=user.id)
-                )
-                if not existing_friendship.scalar_one_or_none():
-                    new_friendship = Friendship(user_id=current_user_id, friend_user_id=user.id)
-                    db_session.add(new_friendship)
-                    await db_session.commit()
-                    flash('Користувача додано до друзів!')
-                else:
-                    flash('Користувач вже є у вашому списку друзів!')
-
-
-        gratitudes = await db_session.execute(
-            select(Gratitude).options(selectinload(Gratitude.user)).filter_by(user_id=user_id)
-        )
-        gratitudes = gratitudes.scalars().all()
+    
+    data = await get_gratitudes_by_method(request.method, current_user_id, user_id)
+    if isinstance(data, str):
+        flash(data)
+        return redirect(url_for('feed')) 
+    
+    user, gratitudes, info = data
+    if info is not None:
+        flash(info)
 
     return render_template('user_profile.html', user=user, gratitudes=gratitudes)
 
 @app.route('/search_users')
 async def search_users():
     query = request.args.get('query', '').strip()
-    async with BaseEngine.async_session() as db_session: #edit
-        results = await db_session.execute(
-            select(User).filter(User.login.ilike(f'%{query}%'))
-        )
-        users = results.scalars().all()
-        
-    return jsonify([{'id': user.id, 'login': user.login} for user in users])
+    users = await get_search_users(query)
+
+    _json = [
+        {
+            'id':    user.id, 
+            'login': user.login
+        } for user in users
+    ]
+    return jsonify(_json)
 
 @app.route('/feed')
 async def feed():
@@ -382,18 +367,7 @@ async def feed():
         flash('Спершу увійдіть до системи!')
         return redirect(url_for('login_view'))
 
-    async with BaseEngine.async_session() as db_session: #edit
-        friendships = await db_session.execute(
-            select(Friendship).filter_by(user_id=user_id)
-        )
-        friend_ids = [friendship.friend_user_id for friendship in friendships.scalars().all()]
-
-        gratitudes = await db_session.execute(
-            select(Gratitude).filter(Gratitude.user_id.in_(friend_ids)).filter(Gratitude.is_public == True)
-            .options(selectinload(Gratitude.user))
-            .order_by(Gratitude.created_at.desc())
-        )
-        gratitudes = gratitudes.scalars().all()
+    gratitudes = await get_gratitudes_by_user_id(user_id)
 
     return render_template('feed.html', gratitudes=gratitudes)
 
@@ -426,15 +400,7 @@ async def gratitudes_by_date(date):
         flash('Неправильний формат дати! Використовуйте YYYY-MM-DD.')
         return redirect(url_for('profile'))
 
-    async with BaseEngine.async_session() as db_session:
-
-        gratitude_entries = await db_session.execute(
-            select(Gratitude).filter_by(user_id=user_id).filter(
-                Gratitude.created_at >= selected_date,
-                Gratitude.created_at < selected_date + timedelta(days=1) 
-            )
-        )
-        todays_gratitudes = gratitude_entries.scalars().all()
+    todays_gratitudes = await get_todays_gratitudes_by_user_id(selected_date)
 
     return render_template('gratitudes_by_date.html', gratitudes=todays_gratitudes, selected_date=selected_date)
 

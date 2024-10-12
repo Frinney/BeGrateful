@@ -5,10 +5,11 @@ from sqlalchemy.engine.result import Sequence
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
-from ..tables import BaseEngine, User, Gratitude
+from ..tables import BaseEngine, User, Gratitude, Friendship
 
 
-from typing import Optional
+from typing   import Optional
+from datetime import datetime, timedelta
 
 
 async def register_user(login: str, password: str, first_name: str, last_name: str, email: str) -> bool:
@@ -76,3 +77,106 @@ async def get_gratitudes() -> Sequence[Gratitude]:
                 .order_by(Gratitude.created_at.desc()) 
             )
             return result.scalars().all()
+
+async def get_todays_gratitudes(user_id: int) -> Sequence[Gratitude] | None:
+    async with BaseEngine.async_session() as db_session:
+        user_result = await db_session.execute(
+            select(User)
+            .filter_by(id=user_id)
+        )
+        user = user_result.scalar()
+
+        if user is None:
+            return
+
+        gratitude_entries = await db_session.execute(
+            select(Gratitude)
+            .filter_by(user_id = user_id)
+            .filter(Gratitude.created_at >= datetime.today())
+        )
+        return gratitude_entries.scalars().all(), user
+
+
+async def get_gratitudes_by_method(method: str, current_user_id: int, user_id: int) -> tuple[User, Sequence[Gratitude], str | None] | str:
+    async with BaseEngine.async_session() as db_session:
+        user = await db_session.execute(
+            select(User)
+            .filter_by(id = user_id)
+        )
+        user = user.scalar()
+
+        if user is None:
+            return 'Користувача не знайдено!'
+
+        gratitudes = await db_session.execute(
+            select(Gratitude)
+            .options(
+                selectinload(Gratitude.user)
+            )
+            .filter_by(user_id = user_id)
+        )
+        gratitudes = gratitudes.scalars().all()
+
+        info = None
+        if method != 'POST':
+            return user, gratitudes, info
+
+        if current_user_id == user.id:
+            info = 'Ви не можете додати себе в друзі!'
+            return user, gratitudes, info
+
+        existing_friendship = await db_session.execute(
+            select(Friendship)
+            .filter_by(
+                user_id = current_user_id, 
+                friend_user_id = user.id
+            )
+        )
+        if existing_friendship.scalar():
+            info = 'Користувач вже є у вашому списку друзів!'
+        else:
+            new_friendship = Friendship(user_id = current_user_id, friend_user_id=user.id)
+            db_session.add(new_friendship)
+            await db_session.commit()
+
+            info = 'Користувача додано до друзів!'
+
+        return user, gratitudes, info
+
+async def get_search_users(query: str) -> Sequence[User]:
+    async with BaseEngine.async_session() as db_session:
+        results = await db_session.execute(
+            select(User).filter(User.login.ilike(f'%{query}%'))
+        )
+        return results.scalars().all()
+    
+async def get_gratitudes_by_user_id(user_id: int) -> Sequence[Gratitude]:
+    async with BaseEngine.async_session() as db_session:
+        friendships = await db_session.execute(
+            select(Friendship)
+            .filter_by(user_id=user_id)
+        )
+        friend_ids = [
+            friendship.friend_user_id 
+            for friendship in friendships.scalars().all()
+        ]
+
+        result = await db_session.execute(
+            select(Gratitude)
+            .filter(Gratitude.user_id.in_(friend_ids))
+            .filter(Gratitude.is_public == True)
+            .options(selectinload(Gratitude.user))
+            .order_by(Gratitude.created_at.desc())
+        )
+        return result.scalars().all()
+
+async def get_todays_gratitudes_by_user_id(user_id: int, selected_date: datetime) -> Sequence[Gratitude]:
+    async with BaseEngine.async_session() as db_session:
+
+        gratitude_entries = await db_session.execute(
+            select(Gratitude).filter_by(user_id=user_id).filter(
+                Gratitude.created_at >= selected_date,
+                Gratitude.created_at < selected_date + timedelta(days=1) 
+            )
+        )
+        return gratitude_entries.scalars().all()
