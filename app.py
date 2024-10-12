@@ -14,6 +14,8 @@ from sqlalchemy.orm    import selectinload
 from sqlalchemy.future import select
 
 
+from config import settings
+
 from data.tables       import BaseEngine, User, Friendship, Gratitude
 from data.queries.user import (
     register_user, get_user_id, add_gratitude, 
@@ -24,9 +26,8 @@ from data.queries.user import (
 from datetime import datetime
 
 
-app = Flask(__name__, template_folder='pages')
-app.secret_key = 'your_secret_key'
-
+app = Flask(__name__, template_folder = 'pages')
+app.secret_key = settings.SECRET_KEY.get_secret_value()
 app.wsgi_app = ProxyFix(app.wsgi_app)
 asgi_app = WsgiToAsgi(app)
 
@@ -68,44 +69,46 @@ async def register():
     errors = {}
     general_error = None
 
-    if request.method == 'POST':
-        first_name = request.form.get('first_name', '')  
-        last_name = request.form.get('last_name', '') 
-        login = request.form['login']
-        email = request.form['email']
-        password = request.form['password']
-        confirm_password = request.form['confirm_password']
+    if request.method == 'GET':
+        return render_template('register.html', errors=errors, form=request.form)
+    
+    first_name = request.form.get('first_name', '')  
+    last_name = request.form.get('last_name', '') 
+    login = request.form['login']
+    email = request.form['email']
+    password = request.form['password']
+    confirm_password = request.form['confirm_password']
 
-        if first_name and not is_valid_name(first_name):
-            errors['first_name'] = 'Ім\'я повинно містити лише букви!'
-        
-        if last_name and not is_valid_name(last_name):
-            errors['last_name'] = 'Прізвище повинно містити лише букви!'
-        
-        if not is_valid_login(login):
-            errors['login'] = 'Логін повинен містити лише латинські букви та цифри, без пробілів!'
-        
-        if not is_valid_email(email):
-            errors['email'] = 'Неправильний формат пошти!'
-        
-        if not is_valid_password(password):
-            errors['password'] = 'Пароль не відповідає вимогам!'
-        
-        if password != confirm_password:
-            errors['confirm_password'] = 'Паролі не співпадають!'
+    if first_name and not is_valid_name(first_name):
+        errors['first_name'] = 'Ім\'я повинно містити лише букви!'
+    
+    if last_name and not is_valid_name(last_name):
+        errors['last_name'] = 'Прізвище повинно містити лише букви!'
+    
+    if not is_valid_login(login):
+        errors['login'] = 'Логін повинен містити лише латинські букви та цифри, без пробілів!'
+    
+    if not is_valid_email(email):
+        errors['email'] = 'Неправильний формат пошти!'
+    
+    if not is_valid_password(password):
+        errors['password'] = 'Пароль не відповідає вимогам!'
+    
+    if password != confirm_password:
+        errors['confirm_password'] = 'Паролі не співпадають!'
 
-        if errors:
-            general_error = 'Некоректні дані. Перевірте їх і повторіть спробу'
-            return render_template('register.html', general_error=general_error, errors=errors, form=request.form)
-        
-        is_exist = await register_user(login, password, first_name, last_name, email)
-        if is_exist:
-            general_error = 'Некоректні дані. Перевірте їх і повторіть спробу'
-            return render_template('register.html', general_error=general_error, errors=errors, form=request.form)
+    if errors:
+        general_error = 'Некоректні дані. Перевірте їх і повторіть спробу'
+        return render_template('register.html', general_error=general_error, errors=errors, form=request.form)
+    
+    is_exist = await register_user(login, password, first_name, last_name, email)
+    if is_exist:
+        general_error = 'Некоректні дані. Перевірте їх і повторіть спробу'
+        return render_template('register.html', general_error=general_error, errors=errors, form=request.form)
 
-        return redirect(url_for('index'))
+    return redirect(url_for('index'))
 
-    return render_template('register.html', errors=errors, form=request.form)
+    #return render_template('register.html', errors=errors, form=request.form)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -113,28 +116,30 @@ async def login_view():
     errors = {}
     invalid_credentials = False 
 
-    if request.method == 'POST':
-        login = request.form.get('login')
-        password = request.form.get('password')
+    if request.method == 'GET':
+        return render_template('login.html', errors=errors, invalid_credentials=invalid_credentials)
+    
+    login = request.form.get('login')
+    password = request.form.get('password')
 
-        if not login:
-            errors['login'] = 'Поле логина не может быть пустым'
-        if not password:
-            errors['password'] = 'Поле пароля не может быть пустым'
+    if not login:
+        errors['login'] = 'Поле логина не может быть пустым'
+    if not password:
+        errors['password'] = 'Поле пароля не может быть пустым'
 
-        if not errors: 
-            user_id = await get_user_id(login, password)
+    if errors: 
+        return render_template('login.html', errors=errors, invalid_credentials=invalid_credentials)
+    
+    user_id = await get_user_id(login, password)
 
-            if user_id is not None:
-                session['user_id'] = user_id
+    if user_id is not None:
+        session['user_id'] = user_id
 
-                return redirect(url_for('index'))
-           
-            invalid_credentials = True  
-            flash('Неправильний логін або пароль!')
-            return redirect(url_for('login_view'))
-
-    return render_template('login.html', errors=errors, invalid_credentials=invalid_credentials)
+        return redirect(url_for('index'))
+    
+    invalid_credentials = True  
+    flash('Неправильний логін або пароль!')
+    return redirect(url_for('login_view'))
 
 
 @app.route('/create', methods=['GET', 'POST'])

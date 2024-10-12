@@ -1,9 +1,5 @@
 import os
 
-from flask import Flask
-from asgiref.wsgi import WsgiToAsgi
-from werkzeug.middleware.proxy_fix import ProxyFix
-
 from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -27,10 +23,4 @@ class Config(BaseSettings):
         env_file_encoding = "utf-8"
     )
 
-
 settings = Config()
-
-app = Flask(__name__, template_folder = 'pages')
-app.secret_key = settings.SECRET_KEY.get_secret_value()
-app.wsgi_app = ProxyFix(app.wsgi_app)
-asgi_app = WsgiToAsgi(app)
