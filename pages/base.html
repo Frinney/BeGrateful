@@ -72,9 +72,11 @@
                             </h2>
                             <h2 class="username">{{ friend.username }}</h2>
                         </div>
-                        <button class="delete-friend">
+
+                        <button class="delete-friend" data-friend-id="{{ friend.id }}">
                             <img src="{{ url_for('static', filename='icons/close-icon.svg') }}" alt="">
                         </button>
+                        
                     </div>
                 {% endfor %}
             </div>
@@ -99,5 +101,7 @@
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
     <script src="{{ url_for('static', filename='js/gratitude.js') }}"></script>
     <script src="{{ url_for('static', filename='js/search.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/deletefriend.js') }}"></script>
+
 </body>
 </html>
