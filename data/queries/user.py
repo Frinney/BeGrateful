@@ -54,12 +54,14 @@ async def add_gratitude(
     content:   Optional[str],
     image_url: Optional[str],
     is_public: bool, 
+    is_friend: bool, 
     user_id:   int
 ) -> None:
     kw = {
         Gratitude.content.key:   content,
         Gratitude.image_url.key: image_url,
         Gratitude.is_public.key: is_public,
+        Gratitude.is_friend.key: is_friend,
         Gratitude.user_id.key:   user_id,
     }
     async with BaseEngine.async_session() as session:

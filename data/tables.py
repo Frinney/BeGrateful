@@ -1,9 +1,11 @@
+from sqlalchemy     import Column, text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
-from sqlalchemy.sql import func
+from sqlalchemy.sql import FromClause, func
+from sqlalchemy.schema       import CreateColumn
 from sqlalchemy.sql.schema   import ForeignKey
 from sqlalchemy.sql.sqltypes import TIMESTAMP, Integer, TEXT, BOOLEAN
-
-from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.sql.elements import TextClause
+from sqlalchemy.ext.asyncio  import AsyncEngine, AsyncSession, async_sessionmaker, create_async_engine
 
 
 from config import settings
@@ -46,6 +48,7 @@ class Gratitude(Base):
     content:   Mapped[TEXT]    = mapped_column(TEXT,    nullable = False)
     image_url: Mapped[TEXT]    = mapped_column(TEXT,    nullable = True)
     is_public: Mapped[BOOLEAN] = mapped_column(BOOLEAN, default  = True)
+    is_friend: Mapped[BOOLEAN] = mapped_column(BOOLEAN, server_default = "FALSE")
     user_id:   Mapped[Integer]  = mapped_column(Integer, ForeignKey(User.id))
     
     user:       Mapped['User']    = relationship('User',     back_populates = 'gratitudes')

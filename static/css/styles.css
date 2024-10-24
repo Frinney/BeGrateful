@@ -155,8 +155,19 @@ li {
 
 .gratitude__footer {
   display: flex;
-  align-items: center;
+  align-items: flex-start; /* Выровнять элементы по верху */
   gap: 40px;
+  flex-wrap: wrap;
+}
+
+.gratitude__save-btn {
+  align-self: flex-start; /* Кнопка всегда будет наверху */
+}
+
+.gratitude__public-option,
+.gratitude__friend-option,
+.gratitude__private-option  {
+  align-self: center; /* Чекбоксы будут выровнены по центру */
 }
 
 .gratitude__save-btn {
@@ -178,12 +189,15 @@ li {
   background-color: #90aaff;
 }
 
-.gratitude__public-option {
+.gratitude__public-option,
+.gratitude__friend-option,
+.gratitude__private-option {
   display: flex;
   align-items: center;
   font-size: 24px;
   color: #000;
   text-transform: lowercase;
+  margin-bottom: 20px; /* Добавляет отступ снизу между элементами */
 }
 
 .gratitude__checkbox {
@@ -234,10 +248,13 @@ li {
   opacity: 1;
 }
 
-.gratitude__public-label {
+.gratitude__public-label,
+.gratitude__friend-label,
+.gratitude__private-label {
   font-weight: 200;
   cursor: pointer;
 }
+
 
 .modal {
   display: none; 

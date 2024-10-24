@@ -12,7 +12,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from sqlalchemy.orm    import selectinload
 from sqlalchemy.future import select
-from sqlalchemy import func
+from sqlalchemy import func, or_
 
 
 from config import settings
@@ -154,7 +154,9 @@ async def create_gratitude():
     if request.method == 'POST':
         content = request.form.get('content')
         image = request.files.get('image')
-        is_public = request.form.get('is_public') is not None 
+        gratitude_option = request.form.get('gratitude_option')
+        is_public = gratitude_option == 'public'
+        is_friend = gratitude_option == 'friend'
         image_url = None
 
         if image:
@@ -169,6 +171,7 @@ async def create_gratitude():
             content,
             image_url,
             is_public, 
+            is_friend, 
             user_id
         )
 
@@ -495,7 +498,9 @@ async def friends_gratitudes():
 
         # Fetch gratitudes from friends
         gratitudes = await db_session.execute(
-            select(Gratitude).filter(Gratitude.user_id.in_(friend_ids)).filter(Gratitude.is_public == True)
+            select(Gratitude)
+            .filter(Gratitude.user_id.in_(friend_ids))
+            .filter(or_(Gratitude.is_public == True, Gratitude.is_friend == True))
             .options(selectinload(Gratitude.user))
             .order_by(Gratitude.created_at.desc())
         )
