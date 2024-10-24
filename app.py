@@ -70,16 +70,44 @@ async def register():
     errors = {}
     general_error = None
 
+    # Определяем лимиты символов для полей ввода
+    CHAR_LIMITS = {
+        'first_name': 25,
+        'last_name': 35,
+        'login': 25,
+        'email': 25,  # Можно изменить лимит в зависимости от требований
+        'password': 50  # Максимальная длина пароля
+    }
+
+    # Если запрос GET, отдаем форму регистрации
     if request.method == 'GET':
-        return render_template('register.html', errors=errors, form=request.form)
-    
-    first_name = request.form.get('first_name', '')  
-    last_name = request.form.get('last_name', '') 
+        return render_template('register.html', errors=errors, form=request.form, CHAR_LIMITS=CHAR_LIMITS)
+
+    # Получаем данные формы
+    first_name = request.form.get('first_name', '')
+    last_name = request.form.get('last_name', '')
     login = request.form['login']
     email = request.form['email']
     password = request.form['password']
     confirm_password = request.form['confirm_password']
 
+    # Проверка длины каждого поля
+    if len(first_name) > CHAR_LIMITS['first_name']:
+        errors['first_name'] = f"Ім'я не повинно перевищувати {CHAR_LIMITS['first_name']} символів!"
+    
+    if len(last_name) > CHAR_LIMITS['last_name']:
+        errors['last_name'] = f"Прізвище не повинно перевищувати {CHAR_LIMITS['last_name']} символів!"
+    
+    if len(login) > CHAR_LIMITS['login']:
+        errors['login'] = f"Логін не повинен перевищувати {CHAR_LIMITS['login']} символів!"
+    
+    if len(email) > CHAR_LIMITS['email']:
+        errors['email'] = f"Пошта не повинна перевищувати {CHAR_LIMITS['email']} символів!"
+    
+    if len(password) > CHAR_LIMITS['password']:
+        errors['password'] = f"Пароль не повинен перевищувати {CHAR_LIMITS['password']} символів!"
+
+    # Остальные проверки (валидность имени, логина, почты и пароля)
     if first_name and not is_valid_name(first_name):
         errors['first_name'] = 'Ім\'я повинно містити лише букви!'
     
@@ -98,17 +126,20 @@ async def register():
     if password != confirm_password:
         errors['confirm_password'] = 'Паролі не співпадають!'
 
+    # Если есть ошибки, отображаем их
     if errors:
         general_error = 'Некоректні дані. Перевірте їх і повторіть спробу'
-        return render_template('register.html', general_error=general_error, errors=errors, form=request.form)
-    
+        return render_template('register.html', general_error=general_error, errors=errors, form=request.form, CHAR_LIMITS=CHAR_LIMITS)
+
+    # Регистрация пользователя
     is_exist = await register_user(login, password, first_name, last_name, email)
+    
     if is_exist:
-        general_error = 'Некоректні дані. Перевірте їх і повторіть спробу'
-        return render_template('register.html', general_error=general_error, errors=errors, form=request.form)
+        general_error = 'Такий користувач уже існує!'
+        return render_template('register.html', general_error=general_error, errors=errors, form=request.form, CHAR_LIMITS=CHAR_LIMITS)
 
+    # Успешная регистрация, редирект на главную страницу
     return redirect(url_for('index'))
-
     #return render_template('register.html', errors=errors, form=request.form)
 
 
