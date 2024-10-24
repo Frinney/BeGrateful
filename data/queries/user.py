@@ -78,7 +78,7 @@ async def get_gratitudes() -> Sequence[Gratitude]:
             )
             return result.scalars().all()
 
-async def get_todays_gratitudes(user_id: int) -> Sequence[Gratitude] | None:
+async def get_todays_gratitudes(user_id: int) -> Optional[tuple[Sequence[Gratitude], User]]:
     async with BaseEngine.async_session() as db_session:
         user_result = await db_session.execute(
             select(User)
@@ -87,14 +87,23 @@ async def get_todays_gratitudes(user_id: int) -> Sequence[Gratitude] | None:
         user = user_result.scalar()
 
         if user is None:
-            return
+            return None
 
+        # Получаем начало и конец текущего дня
+        today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        tomorrow = today + timedelta(days=1)
+
+        # Выбираем и сортируем подяки по убыванию даты
         gratitude_entries = await db_session.execute(
             select(Gratitude)
-            .filter_by(user_id = user_id)
-            .filter(Gratitude.created_at >= datetime.today())
+            .filter_by(user_id=user_id)
+            .filter(Gratitude.created_at >= today)
+            .filter(Gratitude.created_at < tomorrow)
+            .order_by(Gratitude.created_at.desc())  # Сортируем по убыванию
         )
         return gratitude_entries.scalars().all(), user
+
+
 
 
 async def get_gratitudes_by_method(method: str, current_user_id: int, user_id: int) -> tuple[User, Sequence[Gratitude], str | None] | str:
