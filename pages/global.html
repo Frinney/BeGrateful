@@ -3,14 +3,20 @@
 {% block title %}Профіль{% endblock %}
 
 {% block content %}
+
+<ul class="header__links">
+    <li><a href="{{ url_for('global_gratitudes') }}" class="{{ 'active' if request.path == '/global_gratitudes' else '' }}">Глобальні Подяки</a></li>
+    <li><a href="{{ url_for('friends_gratitudes') }}" class="{{ 'active' if request.path == '/friends_gratitudes' else '' }}">Подяки Друзів</a></li>
+</ul>
+
 <section class="global">  
     <h1 class="globel-title">За що вдячен світ</h1>
 
     <!-- Add a toggle for gratitude types -->
-    <div class="gratitude-toggle">
+    <!--<div class="gratitude-toggle">
         <button onclick="location.href='{{ url_for('global_gratitudes') }}'">Глобальні Подяки</button>
         <button onclick="location.href='{{ url_for('friends_gratitudes') }}'">Подяки Друзів</button>
-    </div>
+    </div> -->
 
     {% if gratitudes %}
         {% for gratitude in gratitudes %}

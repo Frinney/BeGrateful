@@ -687,3 +687,30 @@ h2 {
   margin-left: 80px;
 
 }
+
+.header__links {
+  list-style-type: none;
+  display: flex;
+  gap: 20px;
+  padding: 0;
+  margin: 0;
+  justify-content: center;
+  width: 100%; /* Центрируем сами ссылки */
+  text-align: center;
+}
+
+.header__links a {
+  font-family: 'Manrope', sans-serif;
+  text-decoration: none;
+  color: #000000;
+  font-size: 30px;
+  font-weight: 500;
+  line-height: 54.64px;
+  width: 6em;
+}
+
+.header__links a.active {
+  font-weight: bold;
+  color: #000000;
+  border-bottom: 2px solid #000000;
+}
